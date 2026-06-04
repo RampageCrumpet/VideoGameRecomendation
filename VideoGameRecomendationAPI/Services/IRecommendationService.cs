@@ -1,7 +1,7 @@
 ﻿using VideoGameRecomendationDomain.Models.Domain;
 
-namespace VideoGameRecomendationAPI.Services
-    {
+namespace GameRecomendation.Application.Services
+{
     /// <summary>
     /// Generates game recommendations for users.
     /// </summary>

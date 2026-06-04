@@ -1,22 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
-namespace VideoGameRecomendationAPI.Data
+namespace GameRecomendation.Infrastructure
 {
     public class RecommendationDbContextFactory : IDesignTimeDbContextFactory<RecommendationDbContext>
     {
         public RecommendationDbContext CreateDbContext(string[] args)
         {
-            var config = new ConfigurationBuilder()
-                            .SetBasePath(Directory.GetCurrentDirectory())
-                            .AddJsonFile("appsettings.json")
-                            .Build();
-
             var optionsBuilder = new DbContextOptionsBuilder<RecommendationDbContext>();
 
-            optionsBuilder.UseSqlServer(
-                config.GetConnectionString("DefaultConnection")
-            );
+            optionsBuilder.UseSqlServer("Server=localhost;Database=GameRecomendation;Trusted_Connection=True;TrustServerCertificate=True");
 
             return new RecommendationDbContext(optionsBuilder.Options);
         }

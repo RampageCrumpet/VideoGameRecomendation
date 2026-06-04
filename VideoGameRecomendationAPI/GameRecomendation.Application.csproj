@@ -31,7 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VideoGameReccomendationDomain\VideoGameReccomendationDomain.csproj" />
+    <ProjectReference Include="..\GameRecomendation.Infrastructure\GameRecomendation.Infrastructure.csproj" />
+    <ProjectReference Include="..\VideoGameReccomendationDomain\GameReccomendation.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using VideoGameRecomendationAPI.Data;
+using GameRecomendation.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,10 +9,11 @@ builder.Services.AddControllers();
 
 // EF Core DbContext
 builder.Services.AddDbContext<RecommendationDbContext>(options =>
+{
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    )
-);
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        contextBuilder => contextBuilder.MigrationsAssembly("GameRecomendation.Infrastructure"));
+});
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VideoGameRecomendationDomain.Models.Domain;
 
-namespace VideoGameRecomendationAPI.Data
+namespace GameRecomendation.Infrastructure
 {
     public class RecommendationDbContext : DbContext
     {

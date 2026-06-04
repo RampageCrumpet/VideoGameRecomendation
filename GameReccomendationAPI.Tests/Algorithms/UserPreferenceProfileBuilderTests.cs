@@ -1,4 +1,4 @@
-﻿using VideoGameRecomendationAPI.Services;
+﻿using GameRecomendation.Application.Services;
 using VideoGameRecomendationDomain.Models.Domain;
 using VideoGameRecomendationDomain.Models.Enums;
 

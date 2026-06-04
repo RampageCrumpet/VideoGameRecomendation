@@ -1,7 +1,7 @@
 ﻿
 using VideoGameRecomendationDomain.Models.Domain;
 
-namespace VideoGameRecomendationAPI.Algorithm
+namespace GameRecomendation.Application.Algorithm
 {
     /// <summary>
     /// A reccomendation algorithm takes a user's preferences and a list of candidate games and produces a list of games that best match the user's preferences.
