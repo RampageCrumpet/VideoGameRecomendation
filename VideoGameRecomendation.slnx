@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="GameReccomendationAPI.Tests/GameReccomendationAPI.Tests.csproj" />
+  <Project Path="VideoGameReccomendationDomain/VideoGameReccomendationDomain.csproj" />
+  <Project Path="VideoGameRecomendationAPI/VideoGameRecomendationAPI.csproj" />
+</Solution>
