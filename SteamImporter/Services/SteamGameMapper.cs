@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace GameRecomendation.SteamImporter.Services
 {
-    public class SteamGameMapper
+    public class SteamGameMapper : ISteamGameMapper
     {
         public Game? Map(int appId, JsonDocument json)
         {

@@ -2,7 +2,7 @@
 using GameRecomendation.Domain.Enums;
 using GameRecomendation.Domain.Models.Domain;
 
-namespace GameReccomendationAPI.Tests.Algorithms
+namespace GameReccomendationAPI.Tests.APITests
 {
     public class UserPreferenceProfileBuilderTests
     {

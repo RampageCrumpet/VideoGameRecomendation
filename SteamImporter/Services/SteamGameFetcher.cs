@@ -3,7 +3,7 @@ using static System.Net.WebRequestMethods;
 
 namespace GameRecomendation.SteamImporter.Services
 {
-    public class SteamGameFetcher
+    public class SteamGameFetcher : ISteamGameFetcher
     {
         private readonly HttpClient httpClient;
 

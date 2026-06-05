@@ -5,11 +5,11 @@ namespace GameRecomendation.SteamImporter.Services
 {
     public class SteamImportRunner
     {
-        private readonly SteamGameFetcher fetcher;
-        private readonly SteamGameMapper mapper;
+        private readonly ISteamGameFetcher fetcher;
+        private readonly ISteamGameMapper mapper;
         private readonly IRecommendationDbContext dataBase;
 
-        public SteamImportRunner(SteamGameFetcher fetcher, SteamGameMapper mapper,IRecommendationDbContext dataBase)
+        public SteamImportRunner(ISteamGameFetcher fetcher, ISteamGameMapper mapper,IRecommendationDbContext dataBase)
         {
             this.fetcher = fetcher;
             this.mapper = mapper;
