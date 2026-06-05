@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace GameRecomendation.SteamImporter.Data
 {
-    internal interface IAppIdSource
+    public interface IAppIdSource
     {
+        Task<IEnumerable<int>> GetAppIdsAsync();
     }
 }

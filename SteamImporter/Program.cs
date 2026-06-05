@@ -1,9 +1,10 @@
 ﻿using GameRecomendation.Infrastructure;
+using GameRecomendation.SteamImporter.Data;
 using GameRecomendation.SteamImporter.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Configuration;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -22,17 +23,21 @@ builder.Services.AddTransient<SteamGameMapper>();
 
 builder.Services.AddTransient<SteamImportRunner>();
 
+var csvPath = args.Length > 0
+    ? args[0]
+    : "appids.csv";
+
+builder.Services.AddSingleton<IAppIdSource>(
+    new CsvAppIdSource(csvPath));
+
 using var host = builder.Build();
 
 var runner = host.Services.GetRequiredService<SteamImportRunner>();
 
-var appIds = new[]
-{
-    730,
-    570,
-    578080,
-    1091500,
-    1245620
-};
+var appIdSource = host.Services.GetRequiredService<IAppIdSource>();
+
+var appIds = await appIdSource.GetAppIdsAsync();
+
+Console.WriteLine($"Loaded {appIds.Count()} AppIds");
 
 await runner.ImportGamesAsync(appIds);
