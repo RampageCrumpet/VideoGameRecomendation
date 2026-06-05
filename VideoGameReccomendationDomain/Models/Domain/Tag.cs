@@ -1,4 +1,4 @@
-﻿namespace VideoGameRecomendationDomain.Models.Domain
+﻿namespace GameRecomendation.Domain.Models.Domain
 {
     /// <summary>
     /// Represents a steam tag.

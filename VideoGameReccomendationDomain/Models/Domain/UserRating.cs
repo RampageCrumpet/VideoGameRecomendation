@@ -1,6 +1,6 @@
-﻿using VideoGameRecomendationDomain.Models.Enums;
+﻿using GameRecomendation.Domain.Enums;
 
-namespace VideoGameRecomendationDomain.Models.Domain
+namespace GameRecomendation.Domain.Models.Domain
 {
     /// <summary>
     /// Represents a user's opinion of a game.

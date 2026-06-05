@@ -1,4 +1,4 @@
-﻿namespace VideoGameRecomendationDomain.Models.Domain
+﻿namespace GameRecomendation.Domain.Models.Domain
 {
     /// <summary>
     /// This class represents the relationship between a game and a tag.

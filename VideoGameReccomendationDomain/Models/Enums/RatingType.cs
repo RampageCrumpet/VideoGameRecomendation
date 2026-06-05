@@ -1,4 +1,4 @@
-﻿namespace VideoGameRecomendationDomain.Models.Enums
+﻿namespace GameRecomendation.Domain.Enums
 {
     /// <summary>
     /// This enum represents the possible ratings a user can give to a game.

@@ -1,7 +1,7 @@
 ﻿
-using VideoGameRecomendationDomain.Models.Domain;
+using GameRecomendation.Domain.Models.Domain;
 
-namespace GameRecomendation.Application.Services
+namespace GameRecomendation.API.Services
 {
     /// <summary>
     /// A user preference builder is responsible for taking a user's historical ratings and the games they've rated and building a user preference profile that captures the user's preferences for different game tags.

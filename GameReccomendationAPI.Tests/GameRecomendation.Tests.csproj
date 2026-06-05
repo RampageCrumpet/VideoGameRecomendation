@@ -21,8 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VideoGameReccomendationDomain\GameReccomendation.Domain.csproj" />
-    <ProjectReference Include="..\VideoGameRecomendationAPI\GameRecomendation.Application.csproj" />
+    <ProjectReference Include="..\GameRecomendation.Infrastructure\GameRecomendation.Infrastructure.csproj" />
+    <ProjectReference Include="..\VideoGameReccomendationDomain\GameRecomendation.Domain.csproj" />
+    <ProjectReference Include="..\VideoGameRecomendationAPI\GameRecomendation.API.csproj" />
   </ItemGroup>
 
   <ItemGroup>

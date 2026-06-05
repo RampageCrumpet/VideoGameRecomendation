@@ -1,7 +1,8 @@
-﻿using VideoGameRecomendationDomain.Models.Domain;
-using VideoGameRecomendationDomain.Models.Enums;
+﻿
+using GameRecomendation.Domain.Enums;
+using GameRecomendation.Domain.Models.Domain;
 
-namespace GameRecomendation.Application.Services
+namespace GameRecomendation.API.Services
 {
     /// <summary>
     /// Builds a <see cref="UserPreferenceProfile"/> from the given ratings of the given games.

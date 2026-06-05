@@ -1,7 +1,7 @@
-﻿using GameRecomendation.Application.Algorithm;
-using GameRecomendation.Application.Services;
-using VideoGameRecomendationDomain.Models.Domain;
-using VideoGameRecomendationDomain.Models.Enums;
+﻿using GameRecomendation.API.Algorithm;
+using GameRecomendation.API.Services;
+using GameRecomendation.Domain.Enums;
+using GameRecomendation.Domain.Models.Domain;
 
 namespace GameReccomendationAPI.Tests.Algorithms
 {

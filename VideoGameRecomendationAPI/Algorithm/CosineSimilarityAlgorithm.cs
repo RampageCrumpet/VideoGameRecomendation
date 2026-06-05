@@ -1,6 +1,6 @@
-﻿using VideoGameRecomendationDomain.Models.Domain;
+﻿using GameRecomendation.Domain.Models.Domain;
 
-namespace GameRecomendation.Application.Algorithm
+namespace GameRecomendation.API.Algorithm
 {
     public class CosineSimilarityAlgorithm : IRecommendationAlgorithm
     {

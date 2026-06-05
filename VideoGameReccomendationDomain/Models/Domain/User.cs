@@ -1,7 +1,7 @@
-﻿namespace VideoGameRecomendationDomain.Models.Domain
+﻿namespace GameRecomendation.Domain.Models.Domain
 {
     /// <summary>
-    /// This class repsents a user of the video game recommendation system.
+    /// This class repsents a user of the game recommendation system.
     /// </summary>
     public class User
     {

@@ -1,4 +1,4 @@
-﻿namespace VideoGameRecomendationDomain.Models.Domain
+﻿namespace GameRecomendation.Domain.Models.Domain
 {
     /// <summary>
     /// This class holds the user's preferences for game tags, which are used to generate personalized game recommendations. 

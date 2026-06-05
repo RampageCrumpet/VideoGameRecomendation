@@ -1,4 +1,4 @@
-﻿namespace VideoGameRecomendationDomain.Models.Domain
+﻿namespace GameRecomendation.Domain.Models.Domain
 {
     /// <summary>
     /// This class is a data object that represents a video game.

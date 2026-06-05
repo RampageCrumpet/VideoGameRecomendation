@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using VideoGameRecomendationDomain.Models.Domain;
+﻿using GameRecomendation.Domain.Models.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameRecomendation.Infrastructure
 {
-    public class RecommendationDbContext : DbContext
+    public class RecommendationDbContext : DbContext, IRecommendationDbContext
     {
         public RecommendationDbContext(DbContextOptions<RecommendationDbContext> options) : base(options)
         {
@@ -47,7 +47,6 @@ namespace GameRecomendation.Infrastructure
                 entity.HasIndex(game => game.SteamAppId)
                     .IsUnique();
 
-                // ONLY keep navigation declaration (no relationship mapping here)
                 entity.HasMany(game => game.GameTags)
                     .WithOne()
                     .HasForeignKey(gameTag => gameTag.GameId);

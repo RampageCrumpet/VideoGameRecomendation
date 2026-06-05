@@ -1,7 +1,7 @@
-﻿using GameRecomendation.Application.Algorithm;
-using VideoGameRecomendationDomain.Models.Domain;
+﻿using GameRecomendation.API.Algorithm;
+using GameRecomendation.Domain.Models.Domain;
 
-namespace GameRecomendation.Application.Services
+namespace GameRecomendation.API.Services
 {
 
     /// <summary>
