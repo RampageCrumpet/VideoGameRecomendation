@@ -1,7 +1,7 @@
-﻿using GameRecomendation.Domain.Models.Domain;
+using GameRecommendation.Domain.Models.Domain;
 using System.Text.Json;
 
-namespace GameRecomendation.SteamImporter.Services
+namespace GameRecommendation.SteamImporter.Services
 {
     public class SteamGameMapper : ISteamGameMapper
     {

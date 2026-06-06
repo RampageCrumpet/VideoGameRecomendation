@@ -1,7 +1,7 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using static System.Net.WebRequestMethods;
 
-namespace GameRecomendation.SteamImporter.Services
+namespace GameRecommendation.SteamImporter.Services
 {
     public class SteamGameFetcher : ISteamGameFetcher
     {

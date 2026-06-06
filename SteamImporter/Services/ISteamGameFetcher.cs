@@ -1,6 +1,6 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
-namespace GameRecomendation.SteamImporter.Services
+namespace GameRecommendation.SteamImporter.Services
 {
     public interface ISteamGameFetcher
     {

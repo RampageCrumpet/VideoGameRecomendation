@@ -1,6 +1,0 @@
-@VideoGameRecomendationAPI_HostAddress = http://localhost:5104
-
-GET {{VideoGameRecomendationAPI_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

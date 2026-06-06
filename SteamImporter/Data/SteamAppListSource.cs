@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 
-namespace GameRecomendation.SteamImporter.Data
+namespace GameRecommendation.SteamImporter.Data
 {
     public class SteamAppListSource : IAppIdSource
     {

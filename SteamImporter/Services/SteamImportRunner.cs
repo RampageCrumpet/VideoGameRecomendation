@@ -1,9 +1,9 @@
-﻿using GameRecomendation.Domain.Models.Domain;
-using GameRecomendation.Infrastructure;
+using GameRecommendation.Domain.Models.Domain;
+using GameRecommendation.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
-namespace GameRecomendation.SteamImporter.Services
+namespace GameRecommendation.SteamImporter.Services
 {
     /// <summary>
     /// Orchestrates the Steam import pipeline by coordinating data retrieval,

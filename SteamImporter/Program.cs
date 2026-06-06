@@ -1,6 +1,6 @@
-﻿using GameRecomendation.Infrastructure;
-using GameRecomendation.SteamImporter.Data;
-using GameRecomendation.SteamImporter.Services;
+using GameRecommendation.Infrastructure;
+using GameRecommendation.SteamImporter.Data;
+using GameRecommendation.SteamImporter.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

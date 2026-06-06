@@ -1,4 +1,4 @@
-﻿namespace GameRecomendation.SteamImporter.Data
+namespace GameRecommendation.SteamImporter.Data
 {
     public class CsvAppIdSource : IAppIdSource
     {
