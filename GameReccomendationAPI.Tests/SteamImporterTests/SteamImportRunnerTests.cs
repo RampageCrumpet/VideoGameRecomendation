@@ -13,17 +13,9 @@ namespace GameRecomendation.Tests.SteamImporterTests
         [Trait("Category", "Unit")]
         public async Task ImportGamesAsync_AddsNewGame_WhenGameDoesNotExist()
         {
-            // Arrange
-            var options = new DbContextOptionsBuilder<RecommendationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
+            var testHarness = new SteamImportTestHarness();
 
-            var dataBase = new RecommendationDbContext(options);
-            var fetcher = new Mock<ISteamGameFetcher>();
-            var mapper = new Mock<ISteamGameMapper>();
-            var steamTagExtractor = new Mock<ISteamTagExtractor>();
-
-            var json = JsonDocument.Parse("""
+            JsonDocument steamResponse = JsonDocument.Parse("""
             {
                 "123": {
                     "success": true,
@@ -36,54 +28,48 @@ namespace GameRecomendation.Tests.SteamImporterTests
             }
             """);
 
-            fetcher.Setup(x => x.GetGameAsync(123))
-                   .ReturnsAsync(json);
+            testHarness.Fetcher
+                .Setup(fetcher => fetcher.GetGameAsync(123))
+                .ReturnsAsync(steamResponse);
 
-            mapper.Setup(x => x.Map(123, json))
-                  .Returns(new Game
-                  {
-                      SteamAppId = 123,
-                      Name = "Test Game",
-                      Description = "Test description",
-                      ImageUrl = "Some test image URL",
-                      ReleaseDate = DateTime.UtcNow
-                  });
+            testHarness.Mapper
+                .Setup(mapper => mapper.Map(123, steamResponse))
+                .Returns(new Game
+                {
+                    SteamAppId = 123,
+                    Name = "Test Game",
+                    Description = "Test description",
+                    ImageUrl = "Some test image URL",
+                    ReleaseDate = DateTime.UtcNow
+                });
 
-            var runner = new SteamImportRunner(fetcher.Object, mapper.Object, steamTagExtractor.Object, dataBase);
+            testHarness.TagExtractor
+                .Setup(extractor => extractor.Extract(It.IsAny<JsonElement>()))
+                .Returns(new List<string>());
 
-            // Act
-            await runner.ImportGamesAsync(new[] { 123 });
+            await testHarness.Runner.ImportGamesAsync(new[] { 123 });
 
-            // Assert
-            Assert.Equal(1, dataBase.Games.Count());
+            Assert.Single(testHarness.Database.Games);
         }
 
         [Fact]
         [Trait("Category", "Unit")]
         public async Task ImportGamesAsync_DoesNotDuplicate_WhenGameAlreadyExists()
         {
-            var options = new DbContextOptionsBuilder<RecommendationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
+            var testHarness = new SteamImportTestHarness();
 
-            var db = new RecommendationDbContext(options);
-
-            db.Games.Add(new Game
+            testHarness.Database.Games.Add(new Game
             {
                 SteamAppId = 123,
                 Name = "Existing Game",
                 Description = "I already exist",
-                ImageUrl = "Some exising test image URL",
+                ImageUrl = "Some existing test image URL",
                 ReleaseDate = DateTime.MinValue
             });
 
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await testHarness.Database.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-            var fetcher = new Mock<ISteamGameFetcher>();
-            var mapper = new Mock<ISteamGameMapper>();
-            var steamTagExtractor = new Mock<ISteamTagExtractor>();
-
-            JsonDocument json = JsonDocument.Parse("""
+            JsonDocument steamResponse = JsonDocument.Parse("""
             {
                 "123": {
                     "success": true,
@@ -96,52 +82,48 @@ namespace GameRecomendation.Tests.SteamImporterTests
             }
             """);
 
-            fetcher.Setup(x => x.GetGameAsync(123))
-                   .ReturnsAsync(json);
+            testHarness.Fetcher
+                .Setup(fetcher => fetcher.GetGameAsync(123))
+                .ReturnsAsync(steamResponse);
 
-            mapper.Setup(x => x.Map(123, It.IsAny<JsonDocument>()))
-                  .Returns(new Game
-                  {
-                      SteamAppId = 123,
-                      Name = "Some new game",
-                      Description = "some new test description",
-                      ImageUrl = "Some new test image URL",
-                      ReleaseDate = DateTime.UtcNow
-                  });
+            testHarness.Mapper
+                .Setup(mapper => mapper.Map(123, It.IsAny<JsonDocument>()))
+                .Returns(new Game
+                {
+                    SteamAppId = 123,
+                    Name = "Some new game",
+                    Description = "some new test description",
+                    ImageUrl = "Some new test image URL",
+                    ReleaseDate = DateTime.UtcNow
+                });
 
-            var runner = new SteamImportRunner(fetcher.Object, mapper.Object, steamTagExtractor.Object, db);
+            testHarness.TagExtractor
+                .Setup(extractor => extractor.Extract(It.IsAny<JsonElement>()))
+                .Returns(new List<string>());
 
-            await runner.ImportGamesAsync(new[] { 123 });
+            await testHarness.Runner.ImportGamesAsync(new[] { 123 });
 
-            Assert.Equal(1, db.Games.Count());
+            Assert.Single(testHarness.Database.Games);
         }
 
         [Fact]
         [Trait("Category", "Unit")]
         public async Task ImportGamesAsync_UpdatesExistingGame_WhenGameAlreadyExists()
         {
-            var options = new DbContextOptionsBuilder<RecommendationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
+            var testHarness = new SteamImportTestHarness();
 
-            var db = new RecommendationDbContext(options);
-
-            db.Games.Add(new Game
+            testHarness.Database.Games.Add(new Game
             {
                 SteamAppId = 123,
                 Name = "Existing Game",
                 Description = "I already exist",
-                ImageUrl = "Some exising test image URL",
+                ImageUrl = "Some existing test image URL",
                 ReleaseDate = DateTime.MinValue
             });
 
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await testHarness.Database.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-            var fetcher = new Mock<ISteamGameFetcher>();
-            var mapper = new Mock<ISteamGameMapper>();
-            var steamTagExtractor = new Mock<ISteamTagExtractor>();
-
-            JsonDocument json = JsonDocument.Parse("""
+            JsonDocument steamResponse = JsonDocument.Parse("""
             {
                 "123": {
                     "success": true,
@@ -154,49 +136,43 @@ namespace GameRecomendation.Tests.SteamImporterTests
             }
             """);
 
-            fetcher.Setup(x => x.GetGameAsync(123))
-                   .ReturnsAsync(json);
+            testHarness.Fetcher
+                .Setup(fetcher => fetcher.GetGameAsync(123))
+                .ReturnsAsync(steamResponse);
 
-            mapper.Setup(x => x.Map(123, It.IsAny<JsonDocument>()))
-                  .Returns(new Game
-                  {
-                      SteamAppId = 123,
-                      Name = "Some new game",
-                      Description = "some new test description",
-                      ImageUrl = "Some new test image URL",
-                      ReleaseDate = DateTime.UtcNow
-                  });
+            testHarness.Mapper
+                .Setup(mapper => mapper.Map(123, It.IsAny<JsonDocument>()))
+                .Returns(new Game
+                {
+                    SteamAppId = 123,
+                    Name = "Some new game",
+                    Description = "some new test description",
+                    ImageUrl = "Some new test image URL",
+                    ReleaseDate = DateTime.UtcNow
+                });
 
-            var runner = new SteamImportRunner(fetcher.Object, mapper.Object, steamTagExtractor.Object, db);
+            testHarness.TagExtractor
+                .Setup(extractor => extractor.Extract(It.IsAny<JsonElement>()))
+                .Returns(new List<string>());
 
-            await runner.ImportGamesAsync(new[] { 123 });
+            await testHarness.Runner.ImportGamesAsync(new[] { 123 });
 
-            Assert.Equal(1, db.Games.Count());
+            Game updatedGame = testHarness.Database.Games.Single();
 
-            var game = db.Games.Single();
-
-            Assert.Equal(123, game.SteamAppId);
-            Assert.Equal("Some new game", game.Name);
-            Assert.Equal("some new test description", game.Description);
-            Assert.Equal("Some new test image URL", game.ImageUrl);
-            Assert.True(game.ReleaseDate > DateTime.MinValue);
+            Assert.Equal(123, updatedGame.SteamAppId);
+            Assert.Equal("Some new game", updatedGame.Name);
+            Assert.Equal("some new test description", updatedGame.Description);
+            Assert.Equal("Some new test image URL", updatedGame.ImageUrl);
+            Assert.True(updatedGame.ReleaseDate > DateTime.MinValue);
         }
 
         [Fact]
         [Trait("Category", "Unit")]
         public async Task ImportGamesAsync_Skips_WhenMapperReturnsNull()
         {
-            var options = new DbContextOptionsBuilder<RecommendationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
+            var testHarness = new SteamImportTestHarness();
 
-            var db = new RecommendationDbContext(options);
-
-            var fetcher = new Mock<ISteamGameFetcher>();
-            var mapper = new Mock<ISteamGameMapper>();
-            var steamTagExtractor = new Mock<ISteamTagExtractor>();
-
-            var json = JsonDocument.Parse("""
+            JsonDocument steamResponse = JsonDocument.Parse("""
             {
                 "123": {
                     "success": false
@@ -204,17 +180,21 @@ namespace GameRecomendation.Tests.SteamImporterTests
             }
             """);
 
-            fetcher.Setup(x => x.GetGameAsync(123))
-                   .ReturnsAsync(json);
+            testHarness.Fetcher
+                .Setup(fetcher => fetcher.GetGameAsync(123))
+                .ReturnsAsync(steamResponse);
 
-            mapper.Setup(x => x.Map(123, json))
-                  .Returns((Game?)null);
+            testHarness.Mapper
+                .Setup(mapper => mapper.Map(123, steamResponse))
+                .Returns((Game?)null);
 
-            var runner = new SteamImportRunner(fetcher.Object, mapper.Object, steamTagExtractor.Object, db);
+            testHarness.TagExtractor
+                .Setup(extractor => extractor.Extract(It.IsAny<JsonElement>()))
+                .Returns(new List<string>());
 
-            await runner.ImportGamesAsync(new[] { 123 });
+            await testHarness.Runner.ImportGamesAsync(new[] { 123 });
 
-            Assert.Empty(db.Games);
+            Assert.Empty(testHarness.Database.Games);
         }
     }
 }
