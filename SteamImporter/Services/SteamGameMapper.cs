@@ -22,7 +22,8 @@ namespace GameRecommendation.SteamImporter.Services
                 SteamAppId = appId,
                 Name = data.GetProperty("name").GetString() ?? "",
                 Description = data.GetProperty("short_description").GetString() ?? "",
-                ImageUrl = data.GetProperty("header_image").GetString() ?? ""
+                ImageUrl = data.GetProperty("header_image").GetString() ?? "",
+                ReleaseDate = ParseReleaseDate(data.GetProperty("release_date"))
             };
         }
 

@@ -1,4 +1,5 @@
 using GameRecommendation.Domain.Models.Domain;
+using System.Collections.Generic;
 
 namespace GameRecommendation.API.Algorithm
 {
