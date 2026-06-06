@@ -18,24 +18,39 @@ namespace GameRecomendation.SteamImporter.Services
 
         public async Task ImportGamesAsync(IEnumerable<int> appIds)
         {
-            var existingIds = await dataBase.Games
-                           .Select(g => g.SteamAppId)
-                           .ToListAsync();
+            var existingGames = await dataBase.Games
+                .ToDictionaryAsync(g => g.SteamAppId);
 
             foreach (var id in appIds)
             {
-                if (existingIds.Contains(id))
-                    continue;
-
                 var json = await fetcher.GetGameAsync(id);
-                if (json == null) continue;
+
+                if (json == null)
+                {
+                    Console.WriteLine($"Failed to fetch app {id}");
+                    continue;
+                }
 
                 var game = mapper.Map(id, json);
-                if (game == null) continue;
 
-                dataBase.Games.Add(game);
+                if (game == null)
+                {
+                    Console.WriteLine($"Failed to map app {id}");
+                    continue;
+                }
 
-                existingIds.Add(id);
+                if (existingGames.TryGetValue(id, out var existingGame))
+                {
+                    existingGame.Name = game.Name;
+                    existingGame.Description = game.Description;
+                    existingGame.ImageUrl = game.ImageUrl;
+                    existingGame.ReleaseDate = game.ReleaseDate;
+                }
+                else
+                {
+                    dataBase.Games.Add(game);
+                    existingGames.Add(id, game);
+                }
             }
 
             await dataBase.SaveChangesAsync();
