@@ -18,10 +18,10 @@ namespace GameRecomendation.Tests.SteamImporterTests
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
 
-            var db = new RecommendationDbContext(options);
-
+            var dataBase = new RecommendationDbContext(options);
             var fetcher = new Mock<ISteamGameFetcher>();
             var mapper = new Mock<ISteamGameMapper>();
+            var steamTagExtractor = new Mock<ISteamTagExtractor>();
 
             var json = JsonDocument.Parse("""
             {
@@ -49,13 +49,13 @@ namespace GameRecomendation.Tests.SteamImporterTests
                       ReleaseDate = DateTime.UtcNow
                   });
 
-            var runner = new SteamImportRunner(fetcher.Object, mapper.Object, db);
+            var runner = new SteamImportRunner(fetcher.Object, mapper.Object, steamTagExtractor.Object, dataBase);
 
             // Act
             await runner.ImportGamesAsync(new[] { 123 });
 
             // Assert
-            Assert.Equal(1, db.Games.Count());
+            Assert.Equal(1, dataBase.Games.Count());
         }
 
         [Fact]
@@ -81,6 +81,7 @@ namespace GameRecomendation.Tests.SteamImporterTests
 
             var fetcher = new Mock<ISteamGameFetcher>();
             var mapper = new Mock<ISteamGameMapper>();
+            var steamTagExtractor = new Mock<ISteamTagExtractor>();
 
             JsonDocument json = JsonDocument.Parse("""
             {
@@ -108,7 +109,7 @@ namespace GameRecomendation.Tests.SteamImporterTests
                       ReleaseDate = DateTime.UtcNow
                   });
 
-            var runner = new SteamImportRunner(fetcher.Object, mapper.Object, db);
+            var runner = new SteamImportRunner(fetcher.Object, mapper.Object, steamTagExtractor.Object, db);
 
             await runner.ImportGamesAsync(new[] { 123 });
 
@@ -138,6 +139,7 @@ namespace GameRecomendation.Tests.SteamImporterTests
 
             var fetcher = new Mock<ISteamGameFetcher>();
             var mapper = new Mock<ISteamGameMapper>();
+            var steamTagExtractor = new Mock<ISteamTagExtractor>();
 
             JsonDocument json = JsonDocument.Parse("""
             {
@@ -165,7 +167,7 @@ namespace GameRecomendation.Tests.SteamImporterTests
                       ReleaseDate = DateTime.UtcNow
                   });
 
-            var runner = new SteamImportRunner(fetcher.Object, mapper.Object, db);
+            var runner = new SteamImportRunner(fetcher.Object, mapper.Object, steamTagExtractor.Object, db);
 
             await runner.ImportGamesAsync(new[] { 123 });
 
@@ -192,6 +194,7 @@ namespace GameRecomendation.Tests.SteamImporterTests
 
             var fetcher = new Mock<ISteamGameFetcher>();
             var mapper = new Mock<ISteamGameMapper>();
+            var steamTagExtractor = new Mock<ISteamTagExtractor>();
 
             var json = JsonDocument.Parse("""
             {
@@ -207,7 +210,7 @@ namespace GameRecomendation.Tests.SteamImporterTests
             mapper.Setup(x => x.Map(123, json))
                   .Returns((Game?)null);
 
-            var runner = new SteamImportRunner(fetcher.Object, mapper.Object, db);
+            var runner = new SteamImportRunner(fetcher.Object, mapper.Object, steamTagExtractor.Object, db);
 
             await runner.ImportGamesAsync(new[] { 123 });
 

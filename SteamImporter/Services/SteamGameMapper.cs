@@ -25,5 +25,19 @@ namespace GameRecomendation.SteamImporter.Services
                 ImageUrl = data.GetProperty("header_image").GetString() ?? ""
             };
         }
+
+        private static DateTime ParseReleaseDate(JsonElement data)
+        {
+            if (!data.TryGetProperty("release_date", out var rd))
+                return DateTime.MinValue;
+
+            if (rd.TryGetProperty("date", out var dateStr) &&
+                DateTime.TryParse(dateStr.GetString(), out var parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
+        }
     }
 }
