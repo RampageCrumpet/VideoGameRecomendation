@@ -17,24 +17,34 @@ builder.Services.AddDbContext<RecommendationDbContext>(options =>
 builder.Services.AddScoped<IRecommendationDbContext>(
     provider => provider.GetRequiredService<RecommendationDbContext>());
 
-builder.Services.AddHttpClient<SteamGameFetcher>();
+builder.Services.AddHttpClient<ISteamGameFetcher, SteamGameFetcher>();
+builder.Services.AddHttpClient<SteamAppListSource>();
 
-builder.Services.AddTransient<SteamGameMapper>();
-
+builder.Services.AddTransient<ISteamGameMapper, SteamGameMapper>();
+builder.Services.AddTransient<ISteamTagExtractor, SteamTagExtractor>();
 builder.Services.AddTransient<SteamImportRunner>();
 
-var csvPath = args.Length > 0
-    ? args[0]
-    : "appids.csv";
+var mode = args.Length > 0 ? args[0].ToLowerInvariant() : "csv";
+var pathOrNull = args.Length > 1 ? args[1] : null;
 
-builder.Services.AddSingleton<IAppIdSource>(
-    new CsvAppIdSource(csvPath));
+builder.Services.AddSingleton<IAppIdSource>(serviceProvider =>
+{
+    var args = Environment.GetCommandLineArgs();
+
+    var mode = args.Skip(1).FirstOrDefault()?.ToLowerInvariant();
+
+    return mode switch
+    {
+        "csv" when pathOrNull is not null => new CsvAppIdSource(pathOrNull),
+        "full" => serviceProvider.GetRequiredService<SteamAppListSource>(),
+        _ => throw new ArgumentException("Invalid args. Usage: csv <path> | steam")
+    };
+});
 
 using var host = builder.Build();
 
-var runner = host.Services.GetRequiredService<SteamImportRunner>();
-
 var appIdSource = host.Services.GetRequiredService<IAppIdSource>();
+var runner = host.Services.GetRequiredService<SteamImportRunner>();
 
 var appIds = await appIdSource.GetAppIdsAsync();
 

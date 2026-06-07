@@ -186,7 +186,8 @@ namespace GameRecommendation.SteamImporter.Services
                 game.GameTags.Add(new GameTag
                 {
                     Game = game,
-                    Tag = tag
+                    Tag = tag,
+                    Weight = 1.0
                 });
             }
         }

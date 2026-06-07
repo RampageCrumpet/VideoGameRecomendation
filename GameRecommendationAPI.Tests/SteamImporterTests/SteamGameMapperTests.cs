@@ -20,7 +20,8 @@ namespace GameRecommendation.Tests.SteamImporterTests
                     {
                         "name": "Counter-Strike 2",
                         "short_description": "Test Description",
-                        "header_image": "https://image.jpg"
+                        "header_image": "https://image.jpg",
+                        "release_date": { "date": "2023-06-01" }
                     }
                 }
             }

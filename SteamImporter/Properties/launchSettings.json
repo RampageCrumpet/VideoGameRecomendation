@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GameRecommendation.SteamImporter": {
+      "commandName": "Project",
+      "commandLineArgs": "csv \"GameRecommendationAPI.Tests\\SteamImporterTests\\appids.csv\""
+    }
+  }
+}
