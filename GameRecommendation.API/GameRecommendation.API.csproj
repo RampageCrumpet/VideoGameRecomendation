@@ -32,7 +32,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GameRecommendation.Infrastructure\GameRecommendation.Infrastructure.csproj" />
-    <ProjectReference Include="..\VideoGameRecommendationDomain\GameRecommendation.Domain.csproj" />
+    <ProjectReference Include="..\GameRecommendation.Domain\GameRecommendation.Domain.csproj" />
   </ItemGroup>
 
 </Project>

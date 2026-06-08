@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace GameRecommendation.SteamImporter.Services
@@ -5,10 +6,12 @@ namespace GameRecommendation.SteamImporter.Services
     public class SteamGameFetcher : ISteamGameFetcher
     {
         private readonly HttpClient httpClient;
+        private readonly ILogger<SteamGameFetcher> logger;
 
-        public SteamGameFetcher(HttpClient httpClient)
+        public SteamGameFetcher(HttpClient httpClient, ILogger<SteamGameFetcher> logger)
         {
             this.httpClient = httpClient;
+            this.logger = logger;
         }
 
         public async Task<JsonDocument?> GetGameAsync(int appId)
@@ -23,9 +26,14 @@ namespace GameRecommendation.SteamImporter.Services
                 var content = await response.Content.ReadAsStringAsync();
                 return JsonDocument.Parse(content);
             }
+            catch (HttpRequestException ex)
+            {
+                logger.LogError(ex, "HTTP error fetching appId {AppId}", appId);
+                return null;
+            }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to fetch game with appId {appId}: {ex.Message}");
+                logger.LogError(ex, "Unexpected error fetching appId {AppId}", appId);
                 return null;
             }
         }

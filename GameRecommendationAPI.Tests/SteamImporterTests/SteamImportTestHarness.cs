@@ -1,6 +1,7 @@
 using GameRecommendation.Infrastructure;
 using GameRecommendation.SteamImporter.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace GameRecommendation.Tests.SteamImporterTests
@@ -12,6 +13,7 @@ namespace GameRecommendation.Tests.SteamImporterTests
         public Mock<ISteamGameFetcher> Fetcher { get; } = new();
         public Mock<ISteamGameMapper> Mapper { get; } = new();
         public Mock<ISteamTagExtractor> TagExtractor { get; } = new();
+        public Mock<ILogger<SteamImportRunner>> Logger { get; } = new();
 
         public SteamImportRunner Runner { get; }
 
@@ -27,7 +29,8 @@ namespace GameRecommendation.Tests.SteamImporterTests
                 Fetcher.Object,
                 Mapper.Object,
                 TagExtractor.Object,
-                Database);
+                Database,
+                Logger.Object);
         }
     }
 }

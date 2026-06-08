@@ -1,6 +1,7 @@
 using GameRecommendation.Domain.Models.Domain;
 using GameRecommendation.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace GameRecommendation.SteamImporter.Services
@@ -15,6 +16,7 @@ namespace GameRecommendation.SteamImporter.Services
         private readonly ISteamGameMapper mapper;
         private readonly ISteamTagExtractor tagExtractor;
         private readonly IRecommendationDbContext dataBase;
+        private readonly ILogger<SteamImportRunner> logger;
 
         private readonly Dictionary<int, Game> existingGames;
         private readonly Dictionary<string, Tag> existingTags;
@@ -26,16 +28,15 @@ namespace GameRecommendation.SteamImporter.Services
         /// <param name="mapper">Transforms raw Steam JSON into <see cref="Game"/> domain entities.</param>
         /// <param name="tagExtractor">Extracts tag metadata (genres, categories) from Steam responses.</param>
         /// <param name="dataBase">Abstraction over the persistence layer for games and tags.</param>
-        public SteamImportRunner(
-            ISteamGameFetcher fetcher,
-            ISteamGameMapper mapper,
-            ISteamTagExtractor tagExtractor,
-            IRecommendationDbContext dataBase)
+        /// <param name="logger">Logging service for recording import operations and issues.</param>
+        public SteamImportRunner(ISteamGameFetcher fetcher, ISteamGameMapper mapper, 
+            ISteamTagExtractor tagExtractor, IRecommendationDbContext dataBase, ILogger<SteamImportRunner> logger)
         {
             this.fetcher = fetcher;
             this.mapper = mapper;
             this.tagExtractor = tagExtractor;
             this.dataBase = dataBase;
+            this.logger = logger;
 
             existingGames = new Dictionary<int, Game>();
             existingTags = new Dictionary<string, Tag>();
@@ -50,14 +51,27 @@ namespace GameRecommendation.SteamImporter.Services
         /// <returns>A task representing the asynchronous import operation.</returns>
         public async Task ImportGamesAsync(IEnumerable<int> appIds)
         {
-            await LoadCache();
+            var idList = appIds.ToList();
+            logger.LogInformation("Starting import of {Count} games", idList.Count);
 
-            foreach (var id in appIds)
+            await LoadCache();
+            logger.LogInformation("Cache loaded: {Games} existing games, {Tags} existing tags",
+                existingGames.Count, existingTags.Count);
+
+            var succeeded = 0;
+            var failed = 0;
+
+            foreach (var id in idList)
             {
-                await ProcessGame(id);
+                var result = await ProcessGame(id);
+                if (result) succeeded++;
+                else failed++;
             }
 
             await dataBase.SaveChangesAsync();
+
+            logger.LogInformation("Import complete. Succeeded: {Succeeded}, Failed: {Failed}",
+                succeeded, failed);
         }
 
         /// <summary>
@@ -73,16 +87,12 @@ namespace GameRecommendation.SteamImporter.Services
                 .ToListAsync();
 
             foreach (var game in games)
-            {
                 existingGames[game.SteamAppId] = game;
-            }
 
             var tags = await dataBase.Tags.ToListAsync();
 
             foreach (var tag in tags)
-            {
                 existingTags[tag.Name] = tag;
-            }
         }
 
         /// <summary>
@@ -91,20 +101,24 @@ namespace GameRecommendation.SteamImporter.Services
         /// </summary>
         /// <param name="appId">The Steam application ID to process.</param>
         /// <returns>A task representing the asynchronous processing operation.</returns>
-        private async Task ProcessGame(int appId)
+        private async Task<bool> ProcessGame(int appId)
         {
             var context = await FetchGameContext(appId);
             if (context is null)
-                return;
+                return false;
 
             if (existingGames.TryGetValue(appId, out var existing))
             {
                 UpdateExistingGame(existing, context);
+                logger.LogDebug("Updated existing game {AppId} ({Name})", appId, context.Game.Name);
             }
             else
             {
                 CreateNewGame(context);
+                logger.LogDebug("Created new game {AppId} ({Name})", appId, context.Game.Name);
             }
+
+            return true;
         }
 
         /// <summary>
@@ -121,20 +135,19 @@ namespace GameRecommendation.SteamImporter.Services
             var json = await fetcher.GetGameAsync(appId);
             if (json == null)
             {
-                Console.WriteLine($"Failed fetch {appId}");
+                logger.LogWarning("Fetch returned null for appId {AppId}", appId);
                 return null;
             }
 
             var game = mapper.Map(appId, json);
             if (game == null)
             {
-                Console.WriteLine($"Failed map {appId}");
+                logger.LogWarning("Mapper returned null for appId {AppId}", appId);
                 return null;
             }
 
             var root = json.RootElement.GetProperty(appId.ToString());
             var data = root.GetProperty("data");
-
             var tags = tagExtractor.Extract(data);
 
             return new GameImportContext(game, tags);

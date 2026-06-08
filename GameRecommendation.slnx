@@ -2,6 +2,6 @@
   <Project Path="GameRecommendation.Infrastructure/GameRecommendation.Infrastructure.csproj" />
   <Project Path="GameRecommendationAPI.Tests/GameRecommendation.Tests.csproj" />
   <Project Path="SteamImporter/GameRecommendation.SteamImporter.csproj" Id="3d3ee57a-eaab-478a-ad9c-5dcba5625d2e" />
-  <Project Path="VideoGameRecommendationAPI/GameRecommendation.API.csproj" Id="2e38873e-58e4-1be6-0e46-41abbbaa6bfd" />
-  <Project Path="VideoGameRecommendationDomain/GameRecommendation.Domain.csproj" Id="6db9a75c-f4ca-0533-f31d-9ab62f0c2713" />
+  <Project Path="GameRecommendation.API/GameRecommendation.API.csproj" Id="2e38873e-58e4-1be6-0e46-41abbbaa6bfd" />
+  <Project Path="GameRecommendation.Domain/GameRecommendation.Domain.csproj" Id="6db9a75c-f4ca-0533-f31d-9ab62f0c2713" />
 </Solution>
