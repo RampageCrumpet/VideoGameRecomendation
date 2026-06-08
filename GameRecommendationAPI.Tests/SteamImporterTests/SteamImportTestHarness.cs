@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace GameRecommendation.Tests.SteamImporterTests
+namespace GameRecommendation.SteamImporter.Tests
 {
     public class SteamImportTestHarness
     {

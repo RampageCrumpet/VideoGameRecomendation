@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using System.Text.Json;
 
-namespace GameRecommendation.Tests.SteamImporterTests
+namespace GameRecommendation.SteamImporter.Tests
 {
     public class SteamGameMapperTests
     {

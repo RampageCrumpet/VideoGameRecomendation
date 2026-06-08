@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using System.Text.Json;
 
-namespace GameRecommendation.Tests.SteamImporterTests
+namespace GameRecommendation.SteamImporter.Tests
 {
     public class SteamImportRunnerTests
     {
