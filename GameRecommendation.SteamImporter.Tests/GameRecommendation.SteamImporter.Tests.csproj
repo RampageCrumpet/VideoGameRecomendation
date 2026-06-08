@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GameRecommendation.TestUtilities\GameRecommendation.TestUtilities.csproj" />
-    <ProjectReference Include="..\SteamImporter\GameRecommendation.SteamImporter.csproj" />
+    <ProjectReference Include="..\GameRecommendation.SteamImporter\GameRecommendation.SteamImporter.csproj" />
   </ItemGroup>
 
   <ItemGroup>
