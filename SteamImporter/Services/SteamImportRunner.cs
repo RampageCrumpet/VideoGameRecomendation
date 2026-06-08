@@ -1,5 +1,5 @@
 using GameRecommendation.Domain.Models.Domain;
-using GameRecommendation.Infrastructure;
+using GameRecommendation.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;

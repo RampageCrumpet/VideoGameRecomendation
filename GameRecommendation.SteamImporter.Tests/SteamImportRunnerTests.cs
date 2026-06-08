@@ -1,7 +1,4 @@
 using GameRecommendation.Domain.Models.Domain;
-using GameRecommendation.Infrastructure;
-using GameRecommendation.SteamImporter.Services;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using System.Text.Json;
 

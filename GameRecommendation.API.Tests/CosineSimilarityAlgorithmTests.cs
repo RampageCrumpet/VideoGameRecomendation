@@ -1,6 +1,4 @@
 using GameRecommendation.API.Algorithm;
-using GameRecommendation.API.Services;
-using GameRecommendation.Domain.Enums;
 using GameRecommendation.Domain.Models.Domain;
 
 namespace GameRecommendation.API.Tests

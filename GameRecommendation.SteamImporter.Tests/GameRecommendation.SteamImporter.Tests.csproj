@@ -23,10 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GameRecommendation.Infrastructure\GameRecommendation.Infrastructure.csproj" />
+    <ProjectReference Include="..\GameRecommendation.TestUtilities\GameRecommendation.TestUtilities.csproj" />
     <ProjectReference Include="..\SteamImporter\GameRecommendation.SteamImporter.csproj" />
-    <ProjectReference Include="..\GameRecommendation.Domain\GameRecommendation.Domain.csproj" />
-    <ProjectReference Include="..\GameRecommendation.API\GameRecommendation.API.csproj" />
   </ItemGroup>
 
   <ItemGroup>

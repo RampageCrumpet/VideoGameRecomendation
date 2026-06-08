@@ -1,7 +1,4 @@
 using GameRecommendation.SteamImporter.Data;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GameRecommendation.SteamImporter.Tests
 {

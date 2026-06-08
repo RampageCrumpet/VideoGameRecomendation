@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace GameRecommendation.SteamImporter.Helpers
+namespace GameRecommendation.TestUtilities
 {
     /// <summary>
     /// Test implementation of ILogger<T> that records log entries (log level and formatted message) for inspection in

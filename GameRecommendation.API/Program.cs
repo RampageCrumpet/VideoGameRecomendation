@@ -1,4 +1,4 @@
-using GameRecommendation.Infrastructure;
+using GameRecommendation.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

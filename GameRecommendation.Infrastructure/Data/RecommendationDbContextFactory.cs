@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace GameRecommendation.Infrastructure
+namespace GameRecommendation.Infrastructure.Data
 {
     public class RecommendationDbContextFactory : IDesignTimeDbContextFactory<RecommendationDbContext>
     {

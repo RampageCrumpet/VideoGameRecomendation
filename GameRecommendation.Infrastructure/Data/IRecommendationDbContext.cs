@@ -1,7 +1,7 @@
 using GameRecommendation.Domain.Models.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace GameRecommendation.Infrastructure
+namespace GameRecommendation.Infrastructure.Data
 {
     public interface IRecommendationDbContext
     {

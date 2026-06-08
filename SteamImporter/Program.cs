@@ -1,4 +1,4 @@
-using GameRecommendation.Infrastructure;
+using GameRecommendation.Infrastructure.Data;
 using GameRecommendation.SteamImporter.Data;
 using GameRecommendation.SteamImporter.Services;
 using Microsoft.EntityFrameworkCore;
