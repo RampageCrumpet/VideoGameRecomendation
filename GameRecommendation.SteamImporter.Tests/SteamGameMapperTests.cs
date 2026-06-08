@@ -101,5 +101,103 @@ namespace GameRecommendation.SteamImporter.Tests
             Assert.NotNull(result);
             Assert.Equal(DateTime.MinValue, result.ReleaseDate);
         }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_ReturnsGame_WhenJsonIsValid()
+        {
+            var appId = 12345;
+            var json = $@"
+            {{
+                ""{appId}"": {{
+                    ""success"": true,
+                    ""data"": {{
+                        ""name"": ""Test Game"",
+                        ""short_description"": ""Short desc"",
+                        ""header_image"": ""http://image"",
+                        ""release_date"": {{ ""date"": ""Apr 1, 2020"" }}
+                    }}
+                }}
+            }}";
+
+            using var doc = JsonDocument.Parse(json);
+
+            var game = mapper.Map(appId, doc);
+
+            Assert.NotNull(game);
+            Assert.Equal(appId, game!.SteamAppId);
+            Assert.Equal("Test Game", game.Name);
+            Assert.Equal("Short desc", game.Description);
+            Assert.Equal("http://image", game.ImageUrl);
+            Assert.Equal(DateTime.Parse("Apr 1, 2020"), game.ReleaseDate);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_ReturnsNull_WhenAppIdMissing()
+        {
+            var appId = 12345;
+            var json = @"{ ""99999"": { ""success"": true, ""data"": {} } }";
+
+            using var doc = JsonDocument.Parse(json);
+
+            var result = mapper.Map(appId, doc);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_ReturnsNull_WhenSuccessIsFalse()
+        {
+            var appId = 12345;
+            var json = $@"{{ ""{appId}"": {{ ""success"": false }} }}";
+
+            using var doc = JsonDocument.Parse(json);
+
+            var result = mapper.Map(appId, doc);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_ReturnsNull_WhenDataPropertyMissing()
+        {
+            var appId = 12345;
+            var json = $@"{{ ""{appId}"": {{ ""success"": true }} }}";
+
+            using var doc = JsonDocument.Parse(json);
+
+            var result = mapper.Map(appId, doc);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_UnparseableReleaseDate_ReturnsMinValue()
+        {
+            var appId = 12345;
+            var json = $@"
+            {{
+                ""{appId}"": {{
+                    ""success"": true,
+                    ""data"": {{
+                        ""name"": ""Test Game"",
+                        ""short_description"": ""Short desc"",
+                        ""header_image"": ""http://image"",
+                        ""release_date"": {{ ""date"": ""not-a-date"" }}
+                    }}
+                }}
+            }}";
+
+            using var doc = JsonDocument.Parse(json);
+
+            var game = mapper.Map(appId, doc);
+
+            Assert.NotNull(game);
+            Assert.Equal(DateTime.MinValue, game!.ReleaseDate);
+        }
     }
 }
