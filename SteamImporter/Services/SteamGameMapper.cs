@@ -27,12 +27,9 @@ namespace GameRecommendation.SteamImporter.Services
             };
         }
 
-        private static DateTime ParseReleaseDate(JsonElement data)
+        private static DateTime ParseReleaseDate(JsonElement releaseDate)
         {
-            if (!data.TryGetProperty("release_date", out var rd))
-                return DateTime.MinValue;
-
-            if (rd.TryGetProperty("date", out var dateStr) &&
+            if (releaseDate.TryGetProperty("date", out var dateStr) &&
                 DateTime.TryParse(dateStr.GetString(), out var parsed))
             {
                 return parsed;

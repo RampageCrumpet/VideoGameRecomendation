@@ -24,26 +24,42 @@ builder.Services.AddTransient<ISteamGameMapper, SteamGameMapper>();
 builder.Services.AddTransient<ISteamTagExtractor, SteamTagExtractor>();
 builder.Services.AddTransient<SteamImportRunner>();
 
-var mode = args.Length > 0 ? args[0].ToLowerInvariant() : "csv";
-var pathOrNull = args.Length > 1 ? args[1] : null;
-
-builder.Services.AddSingleton<IAppIdSource>(serviceProvider =>
-{
-    var args = Environment.GetCommandLineArgs();
-
-    var mode = args.Skip(1).FirstOrDefault()?.ToLowerInvariant();
-
-    return mode switch
-    {
-        "csv" when pathOrNull is not null => new CsvAppIdSource(pathOrNull),
-        "full" => serviceProvider.GetRequiredService<SteamAppListSource>(),
-        _ => throw new ArgumentException("Invalid args. Usage: csv <path> | steam")
-    };
-});
+var connString = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine($"Connection string: {connString}");
+Console.Out.Flush();
 
 using var host = builder.Build();
 
-var appIdSource = host.Services.GetRequiredService<IAppIdSource>();
+var mode = args.Length > 0
+    ? args[0].ToLowerInvariant()
+    : "csv";
+
+var path = args.Length > 1
+    ? args[1]
+    : null;
+
+IAppIdSource appIdSource;
+try
+{
+    appIdSource = mode switch
+    {
+        "csv" when path is not null
+            => File.Exists(path)
+                ? ActivatorUtilities.CreateInstance<CsvAppIdSource>(host.Services, path)
+                : throw new ArgumentException($"CSV file not found: '{path}'"),
+
+        "full"
+            => host.Services.GetRequiredService<SteamAppListSource>(),
+
+        _ => throw new ArgumentException("Usage: csv <path> | full")
+    };
+}
+catch (ArgumentException ex)
+{
+    Console.Error.WriteLine($"[SteamImporter] {ex.Message}");
+    return;
+}
+
 var runner = host.Services.GetRequiredService<SteamImportRunner>();
 
 var appIds = await appIdSource.GetAppIdsAsync();
@@ -51,3 +67,5 @@ var appIds = await appIdSource.GetAppIdsAsync();
 Console.WriteLine($"Loaded {appIds.Count()} AppIds");
 
 await runner.ImportGamesAsync(appIds);
+
+Console.WriteLine("Finished importing games.");

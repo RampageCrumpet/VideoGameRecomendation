@@ -1,5 +1,4 @@
 using System.Text.Json;
-using static System.Net.WebRequestMethods;
 
 namespace GameRecommendation.SteamImporter.Services
 {
@@ -18,13 +17,15 @@ namespace GameRecommendation.SteamImporter.Services
 
             try
             {
-                var stream = await httpClient.GetStreamAsync(url);
+                var response = await httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
 
-                return await JsonDocument.ParseAsync(stream);
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonDocument.Parse(content);
             }
-            catch
+            catch (Exception ex)
             {
-                Console.WriteLine($"Failed to fetch game with appId {appId}");
+                Console.WriteLine($"Failed to fetch game with appId {appId}: {ex.Message}");
                 return null;
             }
         }
