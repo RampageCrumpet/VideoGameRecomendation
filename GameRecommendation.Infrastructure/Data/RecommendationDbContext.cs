@@ -19,6 +19,8 @@ namespace GameRecommendation.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
+
             ConfigureGames(modelBuilder);
             ConfigureTags(modelBuilder);
             ConfigureGameTags(modelBuilder);

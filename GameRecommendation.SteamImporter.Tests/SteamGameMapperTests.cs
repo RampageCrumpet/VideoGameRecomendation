@@ -199,5 +199,30 @@ namespace GameRecommendation.SteamImporter.Tests
             Assert.NotNull(game);
             Assert.Equal(DateTime.MinValue, game!.ReleaseDate);
         }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_PreservesUnicodeCharacters_InGameName()
+        {
+            var json = JsonDocument.Parse("""
+            {
+                "1938090": {
+                    "success": true,
+                    "data": {
+                        "name": "Call of Duty®",
+                        "short_description": "Test™ Description",
+                        "header_image": "https://image.jpg",
+                        "release_date": { "date": "2023-06-01" }
+                    }
+                }
+            }
+            """);
+
+            var result = mapper.Map(1938090, json);
+
+            Assert.NotNull(result);
+            Assert.Equal("Call of Duty®", result.Name);
+            Assert.Equal("Test™ Description", result.Description);
+        }
     }
 }

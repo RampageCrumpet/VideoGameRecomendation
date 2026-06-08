@@ -17,6 +17,7 @@ namespace GameRecommendation.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .UseCollation("Latin1_General_100_CI_AS_SC_UTF8")
                 .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 

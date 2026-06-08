@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameRecommendation.Infrastructure.Migrations
 {
     [DbContext(typeof(RecommendationDbContext))]
-    [Migration("20260608214604_InitialCreate")]
+    [Migration("20260608221812_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -20,6 +20,7 @@ namespace GameRecommendation.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .UseCollation("Latin1_General_100_CI_AS_SC_UTF8")
                 .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 

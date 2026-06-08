@@ -16,7 +16,7 @@ namespace GameRecommendation.SteamImporter.Services
 
         public async Task<JsonDocument?> GetGameAsync(int appId)
         {
-            var url = $"https://store.steampowered.com/api/appdetails?appids={appId}";
+            var url = $"https://store.steampowered.com/api/appdetails?appids={appId}&l=english";
 
             try
             {
