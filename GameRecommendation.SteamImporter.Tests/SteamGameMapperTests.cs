@@ -1,4 +1,5 @@
 using GameRecommendation.SteamImporter.Services;
+using GameRecommendation.TestUtilities;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Text.Json;
@@ -8,11 +9,12 @@ namespace GameRecommendation.SteamImporter.Tests
     public class SteamGameMapperTests
     {
         private readonly SteamGameMapper mapper;
+        private readonly FakeLogger<SteamGameMapper> logger;
 
         public SteamGameMapperTests()
         {
-            var logger = new Mock<ILogger<SteamGameMapper>>();
-            mapper = new SteamGameMapper(logger.Object);
+            logger = new FakeLogger<SteamGameMapper>();
+            mapper = new SteamGameMapper(logger);
         }
 
         [Fact]
@@ -223,6 +225,77 @@ namespace GameRecommendation.SteamImporter.Tests
             Assert.NotNull(result);
             Assert.Equal("Call of Duty®", result.Name);
             Assert.Equal("Test™ Description", result.Description);
+        }
+
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_DoesNotLog_WhenMappingSucceeds()
+        {
+            var json = JsonDocument.Parse("""
+            {
+                "730": {
+                    "success": true,
+                    "data": {
+                        "name": "Counter-Strike 2",
+                        "short_description": "Test Description",
+                        "header_image": "https://image.jpg",
+                        "release_date": { "date": "2023-06-01" }
+                    }
+                }
+            }
+            """);
+
+            mapper.Map(730, json);
+
+            Assert.Empty(logger.Entries);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_LogsWarning_WhenReleaseDateUnparseable()
+        {
+            var json = JsonDocument.Parse("""
+            {
+                "730": {
+                    "success": true,
+                    "data": {
+                        "name": "Counter-Strike 2",
+                        "short_description": "Test Description",
+                        "header_image": "https://image.jpg",
+                        "release_date": { "date": "coming soon" }
+                    }
+                }
+            }
+            """);
+
+            mapper.Map(730, json);
+
+            Assert.Single(logger.Entries);
+            Assert.Equal(LogLevel.Warning, logger.Entries[0].Level);
+            Assert.Contains("730", logger.Entries[0].Message);
+            Assert.Contains("coming soon", logger.Entries[0].Message);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_LogsWarning_WhenAppIdNotInResponse()
+        {
+            var json = JsonDocument.Parse("""
+            {
+                "999": {
+                    "success": true,
+                    "data": {}
+                }
+            }
+            """);
+
+            mapper.Map(730, json);
+
+            Assert.Single(logger.Entries);
+            Assert.Equal(LogLevel.Warning, logger.Entries[0].Level);
+            Assert.Contains("730", logger.Entries[0].Message);
+            Assert.Contains("not found", logger.Entries[0].Message);
         }
     }
 }
