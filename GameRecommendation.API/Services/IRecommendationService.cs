@@ -1,4 +1,4 @@
-using GameRecommendation.API.DataTransferObjects.Common;
+using GameRecommendation.Domain.Models;
 using GameRecommendation.Domain.Models.Domain;
 
 namespace GameRecommendation.API.Services

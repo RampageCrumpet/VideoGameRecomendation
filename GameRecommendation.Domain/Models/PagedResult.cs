@@ -1,4 +1,4 @@
-﻿namespace GameRecommendation.API.DataTransferObjects.Common
+﻿namespace GameRecommendation.Domain.Models
 {
     /// <summary>
     /// A paginated result set returned from a service method.
