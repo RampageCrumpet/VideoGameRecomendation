@@ -103,7 +103,7 @@ namespace GameRecommendation.Infrastructure.Data
             {
                 entity.HasKey(user => user.Id);
 
-                entity.Property(user => user.Username)
+                entity.Property(user => user.UserName)
                     .IsRequired()
                     .HasMaxLength(100);
 
