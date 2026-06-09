@@ -7,4 +7,5 @@
   <Project Path="GameRecommendation.TestUtilities/GameRecommendation.TestUtilities.csproj" Id="e0eb2536-ceaf-4bb5-880c-73129d486d64" />
   <Project Path="GameRecommendation.SteamImporter.Tests/GameRecommendation.SteamImporter.Tests.csproj" />
   <Project Path="GameRecommendation.SteamImporter/GameRecommendation.SteamImporter.csproj" Id="3d3ee57a-eaab-478a-ad9c-5dcba5625d2e" />
+  <Project Path="GameRecommendation.Web/GameRecommendation.Web.csproj" />
 </Solution>
