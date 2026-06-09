@@ -10,7 +10,7 @@ namespace GameRecommendation.Domain.Models.Domain
         /// <summary>
         /// The Id of the user that made the rating.
         /// </summary>
-        public int UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
         /// <summary>
         /// Navigation to the user who made the rating.

@@ -1,9 +1,10 @@
 using GameRecommendation.Domain.Models.Domain;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameRecommendation.Infrastructure.Data
 {
-    public class RecommendationDbContext : DbContext, IRecommendationDbContext
+    public class RecommendationDbContext : IdentityDbContext<User>, IRecommendationDbContext
     {
         public RecommendationDbContext(DbContextOptions<RecommendationDbContext> options) : base(options)
         {
@@ -12,7 +13,6 @@ namespace GameRecommendation.Infrastructure.Data
         public DbSet<Game> Games => Set<Game>();
         public DbSet<Tag> Tags => Set<Tag>();
         public DbSet<GameTag> GameTags => Set<GameTag>();
-        public DbSet<User> Users => Set<User>();
         public DbSet<UserRating> UserRatings => Set<UserRating>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -24,7 +24,6 @@ namespace GameRecommendation.Infrastructure.Data
             ConfigureGames(modelBuilder);
             ConfigureTags(modelBuilder);
             ConfigureGameTags(modelBuilder);
-            ConfigureUsers(modelBuilder);
             ConfigureUserRatings(modelBuilder);
         }
 
@@ -94,22 +93,6 @@ namespace GameRecommendation.Infrastructure.Data
                 entity.HasOne(gameTag => gameTag.Tag)
                     .WithMany(tag => tag.GameTags)
                     .HasForeignKey(gameTag => gameTag.TagId);
-            });
-        }
-
-        private static void ConfigureUsers(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.HasKey(user => user.Id);
-
-                entity.Property(user => user.UserName)
-                    .IsRequired()
-                    .HasMaxLength(100);
-
-                entity.HasMany(user => user.UserRatings)
-                    .WithOne(userRating => userRating.User)
-                    .HasForeignKey(userRating => userRating.UserId);
             });
         }
 
