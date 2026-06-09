@@ -1,5 +1,7 @@
 using GameRecommendation.API.Algorithm;
 using GameRecommendation.Domain.Models.Domain;
+using GameRecommendation.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameRecommendation.API.Services
 {
@@ -9,24 +11,42 @@ namespace GameRecommendation.API.Services
     /// </summary>
     public class RecommendationService : IRecommendationService
     {
-        private readonly IUserPreferenceBuilder _userPreferenceBuilder;
-        private readonly IRecommendationAlgorithm _recommendationAlgorithm;
+        private readonly IUserPreferenceBuilder userPreferenceBuilder;
+        private readonly IRecommendationAlgorithm recommendationAlgorithm;
+        private readonly IRecommendationDbContext dbContext;
 
-        public RecommendationService(IUserPreferenceBuilder userPreferenceBuilder, IRecommendationAlgorithm recommendationAlgorithm)
+        public RecommendationService(IRecommendationDbContext dbContext, IUserPreferenceBuilder userPreferenceBuilder, IRecommendationAlgorithm recommendationAlgorithm)
         {
-            _userPreferenceBuilder = userPreferenceBuilder;
-            _recommendationAlgorithm = recommendationAlgorithm;
+            this.userPreferenceBuilder = userPreferenceBuilder;
+            this.recommendationAlgorithm = recommendationAlgorithm;
+            this.dbContext = dbContext;
         }
 
-        /// <summary>
-        /// Generates a collection of game recommendations for a user.
-        /// </summary>
-        /// <param name="userId">The user to generate recommendations for.</param>
-        /// <param name="numberOfRecommendations">The maximum number of recommendations to return.</param>
-        /// <returns>A collection of recommendations ordered from best to worst match.</returns>
-        public IEnumerable<RecommendationResult> GetRecommendations(int userId,int numberOfRecommendations)
+        /// <inheritdoc/>
+        public async Task<IEnumerable<RecommendationResult>> GetRecommendationsAsync(string userId, int page, int pageSize)
         {
-            throw new NotImplementedException();
+            var ratings = await dbContext.UserRatings
+                .Where(rating => rating.UserId == userId)
+                .Include(rating => rating.Game)
+                    .ThenInclude(game => game.GameTags)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var ratedGameIds = ratings.Select(rating => rating.GameId).ToHashSet();
+
+            var candidateGames = await dbContext.Games
+                .Where(game => !ratedGameIds.Contains(game.Id))
+                .Include(game => game.GameTags)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var ratedGames = ratings.Select(rating => rating.Game).ToList();
+            var preferenceProfile = userPreferenceBuilder.Build(ratings, ratedGames);
+
+            return recommendationAlgorithm
+                .GenerateRecommendations(preferenceProfile, candidateGames)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
         }
     }
 }

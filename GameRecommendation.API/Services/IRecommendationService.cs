@@ -8,13 +8,12 @@ namespace GameRecommendation.API.Services
     public interface IRecommendationService
     {
         /// <summary>
-        /// Generates a collection of game recommendations for a user.
+        /// Generates a paginated collection of game recommendations for a user.
         /// </summary>
-        /// <param name="userId">The user to generate recommendations for.</param>
-        /// <param name="numberOfRecommendations">The maximum number of recommendations to return.</param>
-        /// <returns>A collection of recommendations ordered from best to worst match.</returns>
-        IEnumerable<RecommendationResult> GetRecommendations(
-            int userId,
-            int numberOfRecommendations);
+        /// <param name="userId">The ID of the user to generate recommendations for.</param>
+        /// <param name="page">The one-based page number.</param>
+        /// <param name="pageSize">The number of recommendations per page.</param>
+        /// <returns>A paginated collection of recommendations ordered from best to worst match.</returns>
+        Task<IEnumerable<RecommendationResult>> GetRecommendationsAsync(string userId, int page, int pageSize);
     }
 }
