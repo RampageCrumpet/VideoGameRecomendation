@@ -1,3 +1,4 @@
+using GameRecommendation.API.DataTransferObjects.Common;
 using GameRecommendation.Domain.Models.Domain;
 
 namespace GameRecommendation.API.Services
@@ -14,6 +15,6 @@ namespace GameRecommendation.API.Services
         /// <param name="page">The one-based page number.</param>
         /// <param name="pageSize">The number of recommendations per page.</param>
         /// <returns>A paginated collection of recommendations ordered from best to worst match.</returns>
-        Task<IEnumerable<RecommendationResult>> GetRecommendationsAsync(string userId, int page, int pageSize);
+        Task<PagedResult<RecommendationResult>> GetRecommendationsAsync(string userId, int page, int pageSize);
     }
 }

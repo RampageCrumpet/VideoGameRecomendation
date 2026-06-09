@@ -1,4 +1,5 @@
 using GameRecommendation.API.Algorithm;
+using GameRecommendation.API.DataTransferObjects.Common;
 using GameRecommendation.Domain.Models.Domain;
 using GameRecommendation.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,7 @@ namespace GameRecommendation.API.Services
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<RecommendationResult>> GetRecommendationsAsync(string userId, int page, int pageSize)
+        public async Task<PagedResult<RecommendationResult>> GetRecommendationsAsync(string userId, int page, int pageSize)
         {
             var ratings = await dbContext.UserRatings
                 .Where(rating => rating.UserId == userId)
@@ -43,10 +44,19 @@ namespace GameRecommendation.API.Services
             var ratedGames = ratings.Select(rating => rating.Game).ToList();
             var preferenceProfile = userPreferenceBuilder.Build(ratings, ratedGames);
 
-            return recommendationAlgorithm
+            var allResults = recommendationAlgorithm
                 .GenerateRecommendations(preferenceProfile, candidateGames)
+                .ToList();
+
+            var items = allResults
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize);
+
+            return new PagedResult<RecommendationResult>
+            {
+                Items = items,
+                TotalCount = allResults.Count
+            };
         }
     }
 }
