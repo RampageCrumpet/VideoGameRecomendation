@@ -1,39 +1,51 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">GameRecommendation.Web</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
+﻿@inject AuthService AuthService
+@inject NavigationManager Navigation
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+    <a class="navbar-brand" href="/">Game Recommendations</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+            <AuthorizeView>
+                <Authorized>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/games">Browse Games</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/recommendations">Recommendations</a>
+                    </li>
+                </Authorized>
+            </AuthorizeView>
+        </ul>
+        <ul class="navbar-nav">
+            <AuthorizeView>
+                <Authorized>
+                    <li class="nav-item">
+                        <span class="nav-link text-light">@context.User.Identity?.Name</span>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light btn-sm" @onclick="HandleLogout">Logout</button>
+                    </li>
+                </Authorized>
+                <NotAuthorized>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Register</a>
+                    </li>
+                </NotAuthorized>
+            </AuthorizeView>
+        </ul>
+    </div>
+</nav>
 
 @code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
+    private void HandleLogout()
     {
-        collapseNavMenu = !collapseNavMenu;
+        AuthService.Logout();
+        Navigation.NavigateTo("/login");
     }
 }
