@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GameRecommendation.API\GameRecommendation.API.csproj" />
     <ProjectReference Include="..\GameRecommendation.Domain\GameRecommendation.Domain.csproj" />
   </ItemGroup>
 

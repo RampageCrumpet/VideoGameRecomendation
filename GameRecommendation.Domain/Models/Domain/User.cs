@@ -1,15 +1,23 @@
 
-using Microsoft.AspNetCore.Identity;
-
 namespace GameRecommendation.Domain.Models.Domain
 {
     /// <summary>
-    /// This class repsents a user of the game recommendation system.
+    /// Represents a user of the game recommendation system.
     /// </summary>
-    public class User : IdentityUser
+    public class User
     {
         /// <summary>
-        /// The date and time the user was created in the system, in UTC.
+        /// The user's unique identifier.
+        /// </summary>
+        public string Id { get; set; } = Guid.NewGuid().ToString();
+
+        /// <summary>
+        /// The user's display name.
+        /// </summary>
+        public required string UserName { get; set; }
+
+        /// <summary>
+        /// The date and time the user was created, in UTC.
         /// </summary>
         public DateTime CreatedUtc { get; set; }
 

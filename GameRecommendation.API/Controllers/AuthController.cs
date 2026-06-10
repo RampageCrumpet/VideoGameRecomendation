@@ -1,5 +1,6 @@
 ﻿using GameRecommendation.API.DataTransferObjects.Auth;
 using GameRecommendation.Domain.Models.Domain;
+using GameRecommendation.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -13,12 +14,14 @@ namespace GameRecommendation.API.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly IConfiguration configuration;
+        private readonly IRecommendationDbContext dbContext;
 
-        public AuthController(UserManager<User> userManager, IConfiguration configuration)
+        public AuthController(UserManager<ApplicationUser> userManager, IRecommendationDbContext dbContext, IConfiguration configuration)
         {
             this.userManager = userManager;
+            this.dbContext = dbContext;
             this.configuration = configuration;
         }
 
@@ -32,25 +35,34 @@ namespace GameRecommendation.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register(RegisterRequestDto request)
         {
-            var user = new User
+            var applicationUser = new ApplicationUser
             {
                 UserName = request.UserName,
-                Email = request.Email,
-                CreatedUtc = DateTime.UtcNow
+                Email = request.Email
             };
 
-            var result = await userManager.CreateAsync(user, request.Password);
+            var result = await userManager.CreateAsync(applicationUser, request.Password);
 
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
-            var (token, expiresUtc) = GenerateJwtToken(user);
+            var domainUser = new User
+            {
+                Id = applicationUser.Id,
+                UserName = request.UserName,
+                CreatedUtc = DateTime.UtcNow
+            };
+
+            dbContext.RatingUsers.Add(domainUser);
+            await dbContext.SaveChangesAsync();
+
+            var (token, expiresUtc) = GenerateJwtToken(applicationUser);
 
             return CreatedAtAction(nameof(Register), new AuthResponseDto
             {
                 Token = token,
                 ExpiresUtc = expiresUtc,
-                UserName = user.UserName!
+                UserName = applicationUser.UserName!
             });
         }
 
@@ -79,7 +91,7 @@ namespace GameRecommendation.API.Controllers
             });
         }
 
-        private (string token, DateTime expiresUtc) GenerateJwtToken(User user)
+        private (string token, DateTime expiresUtc) GenerateJwtToken(ApplicationUser user)
         {
             var jwtKey = configuration["Jwt:Key"]
                 ?? throw new InvalidOperationException("JWT key is not configured.");

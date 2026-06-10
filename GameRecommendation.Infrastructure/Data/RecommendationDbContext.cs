@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameRecommendation.Infrastructure.Data
 {
-    public class RecommendationDbContext : IdentityDbContext<User>, IRecommendationDbContext
+    public class RecommendationDbContext : IdentityDbContext<ApplicationUser>, IRecommendationDbContext
     {
         public RecommendationDbContext(DbContextOptions<RecommendationDbContext> options) : base(options)
         {
@@ -13,6 +13,7 @@ namespace GameRecommendation.Infrastructure.Data
         public DbSet<Game> Games => Set<Game>();
         public DbSet<Tag> Tags => Set<Tag>();
         public DbSet<GameTag> GameTags => Set<GameTag>();
+        public DbSet<User> RatingUsers => Set<User>();
         public DbSet<UserRating> UserRatings => Set<UserRating>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -25,6 +26,7 @@ namespace GameRecommendation.Infrastructure.Data
             ConfigureTags(modelBuilder);
             ConfigureGameTags(modelBuilder);
             ConfigureUserRatings(modelBuilder);
+            ConfigureUsers(modelBuilder);
         }
 
         private static void ConfigureGames(ModelBuilder modelBuilder)
@@ -115,6 +117,25 @@ namespace GameRecommendation.Infrastructure.Data
                 entity.HasOne(userRating => userRating.Game)
                     .WithMany(game => game.UserRatings)
                     .HasForeignKey(userRating => userRating.GameId);
+            });
+        }
+
+        private static void ConfigureUsers(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(user => user.Id);
+
+                entity.Property(user => user.Id)
+                    .ValueGeneratedNever();
+
+                entity.Property(user => user.UserName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.HasMany(user => user.UserRatings)
+                    .WithOne(userRating => userRating.User)
+                    .HasForeignKey(userRating => userRating.UserId);
             });
         }
     }

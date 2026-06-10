@@ -23,7 +23,7 @@ builder.Services.AddScoped<IRecommendationDbContext>(provider =>
     provider.GetRequiredService<RecommendationDbContext>());
 
 // Identity
-builder.Services.AddIdentity<User, IdentityRole>(options =>
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 8;

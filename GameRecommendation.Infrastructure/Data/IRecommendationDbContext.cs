@@ -8,6 +8,7 @@ namespace GameRecommendation.Infrastructure.Data
         DbSet<Game> Games { get; }
         DbSet<GameTag> GameTags { get; }
         DbSet<Tag> Tags { get; }
+        DbSet<User> RatingUsers { get; }
         DbSet<UserRating> UserRatings { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
