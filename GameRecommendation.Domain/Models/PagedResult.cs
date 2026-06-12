@@ -15,5 +15,18 @@
         /// The total number of items across all pages.
         /// </summary>
         public int TotalCount { get; set; }
+
+        /// <summary>
+        /// The number of items per page.
+        /// </summary>
+        public int PageSize { get; set; }
+
+        /// <summary>
+        /// Total number of pages calculated from TotalCount and PageSize.
+        /// </summary>
+        /// <remarks>Rounds up when TotalCount is not a multiple of PageSize. Returns 0 when PageSize is
+        /// less than or equal to 0 to avoid division by zero.</remarks>
+        public int TotalPages => PageSize > 0 ? (int)Math.Ceiling((double)TotalCount / PageSize) : 0;
+
     }
 }

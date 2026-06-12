@@ -55,7 +55,8 @@ namespace GameRecommendation.API.Services
             return new PagedResult<RecommendationResult>
             {
                 Items = items,
-                TotalCount = allResults.Count
+                TotalCount = allResults.Count,
+                PageSize = pageSize
             };
         }
     }

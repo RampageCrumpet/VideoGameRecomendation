@@ -1,0 +1,32 @@
+﻿@inject RatingsService RatingsService
+
+<div class="d-flex gap-2">
+    <button class='btn btn-sm @(CurrentRating == RatingType.Like ? "btn-success" : "btn-outline-success")'
+            @onclick="() => HandleRating(RatingType.Like)">
+        👍 Like
+    </button>
+    <button class='btn btn-sm @(CurrentRating == RatingType.Skip ? "btn-secondary" : "btn-outline-secondary")'
+            @onclick="() => HandleRating(RatingType.Skip)">
+        ⏭ Skip
+    </button>
+    <button class='btn btn-sm @(CurrentRating == RatingType.Dislike ? "btn-danger" : "btn-outline-danger")'
+            @onclick="() => HandleRating(RatingType.Dislike)">
+        👎 Dislike
+    </button>
+</div>
+
+@code {
+    [Parameter] public int GameId { get; set; }
+    [Parameter] public RatingType? CurrentRating { get; set; }
+    [Parameter] public EventCallback OnRatingChanged { get; set; }
+
+    private async Task HandleRating(RatingType rating)
+    {
+        if (CurrentRating == rating)
+            await RatingsService.DeleteRatingAsync(GameId);
+        else
+            await RatingsService.UpsertRatingAsync(GameId, rating);
+
+        await OnRatingChanged.InvokeAsync();
+    }
+}

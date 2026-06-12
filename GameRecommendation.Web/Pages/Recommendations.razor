@@ -1,0 +1,73 @@
+﻿@page "/recommendations"
+@attribute [Authorize]
+@inject RecommendationsService RecommendationsService
+@inject NavigationManager Navigation
+
+<h2 class="mb-4">Your Recommendations</h2>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (recommendations == null)
+{
+    <p class="text-danger">Failed to load recommendations.</p>
+}
+else if (!recommendations.Items.Any())
+{
+    <div class="alert alert-info">
+        No recommendations yet. <a href="/games">Rate some games</a> to get started.
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var recommendation in recommendations.Items)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <img src="@recommendation.ImageUrl" class="card-img-top" alt="@recommendation.Name" />
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="/games/@recommendation.Id">@recommendation.Name</a>
+                        </h5>
+                        <p class="card-text text-muted">
+                            @recommendation.ReleaseDate.Year
+                        </p>
+                    </div>
+                    <div class="card-footer text-muted">
+                        Match: @recommendation.Score.ToString("P0")
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+        <PaginationControls CurrentPage="currentPage" TotalPages="recommendations.TotalPages" OnPageChanged="HandlePageChanged" />
+    </div>
+}
+
+@code {
+    private PagedResult<RecommendationsService.RecommendationResponse>? recommendations;
+    private int currentPage = 1;
+    private bool isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRecommendations();
+    }
+
+    private async Task LoadRecommendations()
+    {
+        isLoading = true;
+        recommendations = await RecommendationsService.GetRecommendationsAsync(currentPage, 20);
+        isLoading = false;
+    }
+
+    private async Task HandlePageChanged(int page)
+    {
+        currentPage = page;
+        await LoadRecommendations();
+    }
+}

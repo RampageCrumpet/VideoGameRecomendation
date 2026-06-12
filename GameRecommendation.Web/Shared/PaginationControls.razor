@@ -1,0 +1,33 @@
+﻿<nav>
+    <ul class="pagination mb-0">
+        <li class='page-item @(CurrentPage <= 1 ? "disabled" : "")'>
+            <button class="page-link" @onclick="() => HandlePageChanged(CurrentPage - 1)">Previous</button>
+        </li>
+
+        @for (int i = 1; i <= TotalPages; i++)
+        {
+            var currentPage = i;
+            <li class='page-item @(currentPage == CurrentPage ? "active" : "")'>
+                <button class="page-link" @onclick="() => HandlePageChanged(currentPage)">@currentPage</button>
+            </li>
+        }
+
+        <li class='page-item @(CurrentPage >= TotalPages ? "disabled" : "")'>
+            <button class="page-link" @onclick="() => HandlePageChanged(CurrentPage + 1)">Next</button>
+        </li>
+    </ul>
+</nav>
+
+@code {
+    [Parameter] public int CurrentPage { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+    [Parameter] public EventCallback<int> OnPageChanged { get; set; }
+
+    private async Task HandlePageChanged(int page)
+    {
+        if (page < 1 || page > TotalPages)
+            return;
+
+        await OnPageChanged.InvokeAsync(page);
+    }
+}

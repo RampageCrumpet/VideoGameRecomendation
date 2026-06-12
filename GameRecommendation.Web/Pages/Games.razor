@@ -1,0 +1,87 @@
+﻿@page "/games"
+@attribute [Authorize]
+@inject GamesService GamesService
+@inject RatingsService RatingsService
+
+<h2 class="mb-4">Browse Games</h2>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search games..." @bind="searchTerm" @bind:event="oninput" @onkeyup="HandleSearchKeyUp" />
+            <button class="btn btn-outline-secondary" @onclick="LoadGames">Search</button>
+        </div>
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (games == null)
+{
+    <p class="text-danger">Failed to load games.</p>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var game in games.Items)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <img src="@game.ImageUrl" class="card-img-top" alt="@game.Name" />
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="/games/@game.Id">@game.Name</a>
+                        </h5>
+                        <p class="card-text text-muted">
+                            @game.ReleaseDate.Year
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <RatingControl GameId="@game.Id" CurrentRating="@game.UserRating" OnRatingChanged="LoadGames" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <span class="text-muted">@games.TotalCount games found</span>
+        <PaginationControls CurrentPage="currentPage" TotalPages="games.TotalPages" OnPageChanged="HandlePageChanged" />
+    </div>
+}
+
+@code {
+    private PagedResult<GamesService.GameSummaryResponse>? games;
+    private string searchTerm = string.Empty;
+    private int currentPage = 1;
+    private bool isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGames();
+    }
+
+    private async Task LoadGames()
+    {
+        isLoading = true;
+        games = await GamesService.GetGamesAsync(currentPage, 20, searchTerm);
+        isLoading = false;
+    }
+
+    private async Task HandleSearchKeyUp(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            currentPage = 1;
+            await LoadGames();
+        }
+    }
+
+    private async Task HandlePageChanged(int page)
+    {
+        currentPage = page;
+        await LoadGames();
+    }
+}

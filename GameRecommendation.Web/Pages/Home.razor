@@ -1,7 +1,14 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<AuthorizeView>
+    <Authorized>
+        @{
+            Navigation.NavigateTo("/games");
+        }
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+</AuthorizeView>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+@inject NavigationManager Navigation
