@@ -23,14 +23,4 @@ builder.Services.AddScoped<GamesService>();
 builder.Services.AddScoped<RatingsService>();
 builder.Services.AddScoped<RecommendationsService>();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("BlazorClient", policy =>
-    {
-        policy.WithOrigins(allowedOrigins)
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
-
 await builder.Build().RunAsync();

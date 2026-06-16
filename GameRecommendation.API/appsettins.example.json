@@ -1,0 +1,20 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=GameRecommendation;Trusted_Connection=True;"
+  },
+  "Jwt": {
+    "Key": "i_am_a_test_key_that_is_only_used_for_local_testing",
+    "Issuer": "GameRecommendation.API",
+    "Audience": "GameRecommendation.Web"
+  },
+  "Cors": {
+    "AllowedOrigins": [ "http://localhost:5085" ]
+  }
+}

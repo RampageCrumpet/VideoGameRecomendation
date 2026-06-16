@@ -1,6 +1,7 @@
 ﻿using GameRecommendation.API.DataTransferObjects.Auth;
 using GameRecommendation.Domain.Models.Domain;
 using GameRecommendation.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -31,6 +32,7 @@ namespace GameRecommendation.API.Controllers
         /// <param name="request">The registration details.</param>
         /// <returns>A JWT token on success, or validation errors on failure.</returns>
         [HttpPost("register")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register(RegisterRequestDto request)
@@ -72,6 +74,7 @@ namespace GameRecommendation.API.Controllers
         /// <param name="request">The login credentials.</param>
         /// <returns>A JWT token on success, or 401 on failure.</returns>
         [HttpPost("login")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login(LoginRequestDto request)
