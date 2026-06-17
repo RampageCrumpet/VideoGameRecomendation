@@ -18,12 +18,14 @@ namespace GameRecommendation.API.Controllers
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IConfiguration configuration;
         private readonly IRecommendationDbContext dbContext;
+        private readonly ILogger<AuthController> logger;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IRecommendationDbContext dbContext, IConfiguration configuration)
+        public AuthController(UserManager<ApplicationUser> userManager, IRecommendationDbContext dbContext, IConfiguration configuration, ILogger<AuthController> logger)
         {
             this.userManager = userManager;
             this.dbContext = dbContext;
             this.configuration = configuration;
+            this.logger = logger;
         }
 
         /// <summary>
@@ -79,19 +81,28 @@ namespace GameRecommendation.API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login(LoginRequestDto request)
         {
-            var user = await userManager.FindByEmailAsync(request.Email);
-
-            if (user == null || !await userManager.CheckPasswordAsync(user, request.Password))
-                return Unauthorized();
-
-            var (token, expiresUtc) = GenerateJwtToken(user);
-
-            return Ok(new AuthResponseDto
+            try
             {
-                Token = token,
-                ExpiresUtc = expiresUtc,
-                UserName = user.UserName!
-            });
+                var user = await userManager.FindByEmailAsync(request.Email);
+
+                if (user == null || !await userManager.CheckPasswordAsync(user, request.Password))
+                    return Unauthorized(new { error = "Invalid email or password." });
+
+                var (token, expiresUtc) = GenerateJwtToken(user);
+
+                return Ok(new AuthResponseDto
+                {
+                    Token = token,
+                    ExpiresUtc = expiresUtc,
+                    UserName = user.UserName!
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // multiple users found for the given email
+                logger?.LogError(ex, "Multiple users with same email found: {Email}", request.Email);
+                return Problem(detail: "Multiple accounts exist for this email address. Please contact support.", statusCode: StatusCodes.Status400BadRequest);
+            }
         }
 
         private (string token, DateTime expiresUtc) GenerateJwtToken(ApplicationUser user)

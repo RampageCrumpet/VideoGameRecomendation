@@ -6,9 +6,9 @@ namespace GameRecommendation.Infrastructure.Data
 {
     public class RecommendationDbContext : IdentityDbContext<ApplicationUser>, IRecommendationDbContext
     {
-        public RecommendationDbContext(DbContextOptions<RecommendationDbContext> options) : base(options)
-        {
-        }
+        public RecommendationDbContext(DbContextOptions<RecommendationDbContext> options) : base(options) { }
+
+        protected RecommendationDbContext(DbContextOptions options) : base(options) { }
 
         public DbSet<Game> Games => Set<Game>();
         public DbSet<Tag> Tags => Set<Tag>();

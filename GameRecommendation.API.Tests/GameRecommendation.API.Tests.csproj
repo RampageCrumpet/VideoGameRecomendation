@@ -13,6 +13,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.9" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.6.0" />
     <PackageReference Include="Moq" Version="4.20.72" />
@@ -25,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GameRecommendation.API\GameRecommendation.API.csproj" />
+    <ProjectReference Include="..\GameRecommendation.TestUtilities\GameRecommendation.TestUtilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

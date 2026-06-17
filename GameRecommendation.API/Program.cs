@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.DependencyInjection;
 
 using System.Text;
 
@@ -30,6 +29,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     options.Password.RequiredLength = 8;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = false;
+    options.User.RequireUniqueEmail = true;
 })
     .AddEntityFrameworkStores<RecommendationDbContext>()
     .AddDefaultTokenProviders();
