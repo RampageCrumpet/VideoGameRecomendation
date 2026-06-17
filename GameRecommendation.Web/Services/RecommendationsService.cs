@@ -24,14 +24,14 @@ namespace GameRecommendation.Web.Services
         /// </summary>
         public async Task<PagedResult<RecommendationResponse>?> GetRecommendationsAsync(int page = 1, int pageSize = 20)
         {
-            AttachToken();
+            await AttachTokenAsync();
             return await httpClient.GetFromJsonAsync<PagedResult<RecommendationResponse>>(
                 $"api/recommendations?page={page}&pageSize={pageSize}");
         }
 
-        private void AttachToken()
+        private async Task AttachTokenAsync()
         {
-            var token = authStateProvider.GetToken();
+            var token = await authStateProvider.GetToken();
             if (token != null)
                 httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);

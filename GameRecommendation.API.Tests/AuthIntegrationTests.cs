@@ -1,17 +1,23 @@
-﻿using System.Net.Http.Json;
-using System.Text.Json;
-using GameRecommendation.Infrastructure.Data;
+﻿using GameRecommendation.Infrastructure.Data;
+using GameRecommendation.TestUtilities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using GameRecommendation.TestUtilities;
+using Microsoft.IdentityModel.Tokens;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 
 namespace GameRecommendation.API.Tests
 {
     public class AuthIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly WebApplicationFactory<Program> factory;
+        private const string TestJwtKey = "TestKey_32_Characters_Long_For_HmacSha256!";
+        private const string TestJwtIssuer = "GameRecommendation.API";
+        private const string TestJwtAudience = "GameRecommendation.Web";
 
         public AuthIntegrationTests(WebApplicationFactory<Program> factory)
         {
@@ -20,17 +26,13 @@ namespace GameRecommendation.API.Tests
 
         private HttpClient CreateTestClient(string dbName)
         {
-            var testJwtKey = "TestKey_32_Characters_Long_For_HmacSha256!";
-
             return factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureAppConfiguration((ctx, cfg) =>
                 {
                     cfg.AddInMemoryCollection(new Dictionary<string, string?>
                     {
-                        ["Jwt:Key"] = testJwtKey,
-                        ["Jwt:Issuer"] = "TestIssuer",
-                        ["Jwt:Audience"] = "TestAudience"
+                        ["Jwt:Key"] = TestJwtKey
                     });
                 });
 
@@ -53,6 +55,21 @@ namespace GameRecommendation.API.Tests
 
                     services.AddScoped<IRecommendationDbContext>(sp =>
                         sp.GetRequiredService<RecommendationDbContext>());
+
+                    services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+                            ValidIssuer = TestJwtIssuer,
+                            ValidAudience = TestJwtAudience,
+                            IssuerSigningKey = new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(TestJwtKey))
+                        };
+                    });
                 });
 
                 builder.ConfigureServices(services =>
@@ -108,8 +125,7 @@ namespace GameRecommendation.API.Tests
 
             var protectedResponse = await client.GetAsync("api/recommendations");
 
-            //Assert.NotEqual(System.Net.HttpStatusCode.Unauthorized, protectedResponse.StatusCode);
-            Assert.True(false, $"Status: {protectedResponse.StatusCode}, Body: {await protectedResponse.Content.ReadAsStringAsync()}");
+            Assert.NotEqual(System.Net.HttpStatusCode.Unauthorized, protectedResponse.StatusCode);
         }
     }
 }

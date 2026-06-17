@@ -24,7 +24,7 @@ namespace GameRecommendation.Web.Services
         /// </summary>
         public async Task<bool> UpsertRatingAsync(int gameId, RatingType rating)
         {
-            AttachToken();
+            await AttachTokenAsync();
             var response = await httpClient.PutAsJsonAsync("api/ratings", new { gameId, rating });
             return response.IsSuccessStatusCode;
         }
@@ -34,14 +34,14 @@ namespace GameRecommendation.Web.Services
         /// </summary>
         public async Task<bool> DeleteRatingAsync(int gameId)
         {
-            AttachToken();
+            await AttachTokenAsync();
             var response = await httpClient.DeleteAsync($"api/ratings/{gameId}");
             return response.IsSuccessStatusCode;
         }
 
-        private void AttachToken()
+        private async Task AttachTokenAsync()
         {
-            var token = authStateProvider.GetToken();
+            var token = await authStateProvider.GetToken();
             if (token != null)
                 httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);

@@ -1,59 +1,68 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
 using System.Security.Claims;
 using System.Text.Json;
 
 namespace GameRecommendation.Web.Auth
 {
     /// <summary>
-    /// Manages authentication state for the Blazor application using a JWT stored in memory.
+    /// Manages authentication state for the Blazor application using a JWT persisted to localStorage.
     /// </summary>
     public class JwtAuthenticationStateProvider : AuthenticationStateProvider
     {
         private static readonly AuthenticationState Anonymous =
             new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 
-        private string? token;
+        private readonly IJSRuntime js;
+        private const string TokenKey = "authToken";
+
+        public JwtAuthenticationStateProvider(IJSRuntime js)
+        {
+            this.js = js;
+        }
 
         /// <inheritdoc/>
-        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
+            var token = await js.InvokeAsync<string?>("localStorage.getItem", TokenKey);
+
             if (string.IsNullOrWhiteSpace(token))
-                return Task.FromResult(Anonymous);
+                return Anonymous;
 
             var identity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
-            return Task.FromResult(new AuthenticationState(new ClaimsPrincipal(identity)));
+            return new AuthenticationState(new ClaimsPrincipal(identity));
         }
 
         /// <summary>
-        /// Stores the JWT and notifies the application that authentication state has changed.
+        /// Stores the JWT in localStorage and notifies the application that authentication state has changed.
         /// </summary>
-        public void NotifyUserAuthenticated(string jwtToken)
+        public async Task NotifyUserAuthenticated(string jwtToken)
         {
-            token = jwtToken;
-            var identity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
+            await js.InvokeVoidAsync("localStorage.setItem", TokenKey, jwtToken);
+            var identity = new ClaimsIdentity(ParseClaimsFromJwt(jwtToken), "jwt");
             NotifyAuthenticationStateChanged(
                 Task.FromResult(new AuthenticationState(new ClaimsPrincipal(identity))));
         }
 
         /// <summary>
-        /// Clears the stored JWT and notifies the application that the user has logged out.
+        /// Removes the JWT from localStorage and notifies the application that the user has logged out.
         /// </summary>
-        public void NotifyUserLoggedOut()
+        public async Task NotifyUserLoggedOut()
         {
-            token = null;
+            await js.InvokeVoidAsync("localStorage.removeItem", TokenKey);
             NotifyAuthenticationStateChanged(Task.FromResult(Anonymous));
         }
 
         /// <summary>
-        /// Returns the stored JWT for attaching to outgoing HTTP requests, or null if not authenticated.
+        /// Returns the stored JWT from localStorage for attaching to outgoing HTTP requests, or null if not authenticated.
         /// </summary>
-        public string? GetToken() => token;
+        public async Task<string?> GetToken() =>
+            await js.InvokeAsync<string?>("localStorage.getItem", TokenKey);
 
         private static IEnumerable<Claim> ParseClaimsFromJwt(string jwtToken)
         {
             var payload = jwtToken.Split('.')[1];
 
-            // JWT base64url padding
             switch (payload.Length % 4)
             {
                 case 2: payload += "=="; break;

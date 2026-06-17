@@ -29,8 +29,6 @@ namespace GameRecommendation.Web.Services
         /// <summary>
         /// Attempts to extract the user friendly string from an error message.
         /// </summary>
-        /// <param name="content"> The JSON error message we want to extract the user friendly string from.</param>
-        /// <returns>The user friendly string if one is found, otherwise it returns the unmodified string.</returns>
         private static string ExtractFriendlyError(string content)
         {
             if (string.IsNullOrWhiteSpace(content))
@@ -41,7 +39,6 @@ namespace GameRecommendation.Web.Services
                 using var doc = JsonDocument.Parse(content);
                 var root = doc.RootElement;
 
-                // ProblemDetails: { "errors": { "field": ["msg", ...], ... }, "title": "...", "detail": "..." }
                 if (root.ValueKind == JsonValueKind.Object)
                 {
                     if (root.TryGetProperty("errors", out var errors) && errors.ValueKind == JsonValueKind.Object)
@@ -60,7 +57,6 @@ namespace GameRecommendation.Web.Services
                         return detail.GetString()!;
                 }
 
-                // Identity error array: [ { "code": "...", "description": "..." }, ... ]
                 if (root.ValueKind == JsonValueKind.Array)
                 {
                     var descriptions = new List<string>();
@@ -92,7 +88,6 @@ namespace GameRecommendation.Web.Services
                 // ignore parse errors
             }
 
-            // fallback to raw content
             return content.Length > 0 ? content : "An error occurred.";
         }
 
@@ -102,22 +97,16 @@ namespace GameRecommendation.Web.Services
         public async Task<(bool success, string? error)> RegisterAsync(string userName, string email, string password)
         {
             httpClient.DefaultRequestHeaders.Authorization = null;
-            var response = await httpClient.PostAsJsonAsync("api/auth/register", new
-            {
-                userName,
-                email,
-                password
-            });
+            var response = await httpClient.PostAsJsonAsync("api/auth/register", new { userName, email, password });
 
             if (!response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                var message = ExtractFriendlyError(content);
-                return (false, message);
+                return (false, ExtractFriendlyError(content));
             }
 
             var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
-            authStateProvider.NotifyUserAuthenticated(result!.Token);
+            await authStateProvider.NotifyUserAuthenticated(result!.Token);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
 
             return (true, null);
@@ -129,11 +118,7 @@ namespace GameRecommendation.Web.Services
         public async Task<(bool success, string? error)> LoginAsync(string email, string password)
         {
             httpClient.DefaultRequestHeaders.Authorization = null;
-            var response = await httpClient.PostAsJsonAsync("api/auth/login", new
-            {
-                email,
-                password
-            });
+            var response = await httpClient.PostAsJsonAsync("api/auth/login", new { email, password });
 
             if (!response.IsSuccessStatusCode)
             {
@@ -141,12 +126,11 @@ namespace GameRecommendation.Web.Services
                     return (false, "Invalid email or password.");
 
                 var content = await response.Content.ReadAsStringAsync();
-                var message = ExtractFriendlyError(content);
-                return (false, message);
+                return (false, ExtractFriendlyError(content));
             }
 
             var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
-            authStateProvider.NotifyUserAuthenticated(result!.Token);
+            await authStateProvider.NotifyUserAuthenticated(result!.Token);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
 
             return (true, null);
@@ -155,9 +139,9 @@ namespace GameRecommendation.Web.Services
         /// <summary>
         /// Logs out the current user by clearing the stored JWT.
         /// </summary>
-        public void Logout()
+        public async Task Logout()
         {
-            authStateProvider.NotifyUserLoggedOut();
+            await authStateProvider.NotifyUserLoggedOut();
             httpClient.DefaultRequestHeaders.Authorization = null;
         }
 

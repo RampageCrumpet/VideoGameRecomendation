@@ -25,7 +25,7 @@ namespace GameRecommendation.Web.Services
         /// </summary>
         public async Task<PagedResult<GameSummaryResponse>?> GetGamesAsync(int page = 1, int pageSize = 20, string? search = null)
         {
-            AttachToken();
+            await AttachTokenAsync();
             var url = $"api/games?page={page}&pageSize={pageSize}";
             if (!string.IsNullOrWhiteSpace(search))
                 url += $"&search={Uri.EscapeDataString(search)}";
@@ -38,13 +38,13 @@ namespace GameRecommendation.Web.Services
         /// </summary>
         public async Task<GameDetailResponse?> GetGameAsync(int id)
         {
-            AttachToken();
+            await AttachTokenAsync();
             return await httpClient.GetFromJsonAsync<GameDetailResponse>($"api/games/{id}");
         }
 
-        private void AttachToken()
+        private async Task AttachTokenAsync()
         {
-            var token = authStateProvider.GetToken();
+            var token = await authStateProvider.GetToken();
             if (token != null)
                 httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
