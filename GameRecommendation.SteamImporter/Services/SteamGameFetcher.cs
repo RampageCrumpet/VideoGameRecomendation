@@ -3,6 +3,9 @@ using System.Text.Json;
 
 namespace GameRecommendation.SteamImporter.Services
 {
+    /// <summary>
+    /// Fetches game data from the Steam store API.
+    /// </summary>
     public class SteamGameFetcher : ISteamGameFetcher
     {
         private readonly HttpClient httpClient;
@@ -14,6 +17,11 @@ namespace GameRecommendation.SteamImporter.Services
             this.logger = logger;
         }
 
+        /// <summary>
+        /// Fetches the raw game data for the given Steam AppId from the Steam store API.
+        /// </summary>
+        /// <param name="appId">The Steam AppId of the game to fetch.</param>
+        /// <returns>A <see cref="JsonDocument"/> containing the raw game data, or null if the request failed.</returns>
         public async Task<JsonDocument?> GetGameAsync(int appId)
         {
             var url = $"https://store.steampowered.com/api/appdetails?appids={appId}&l=english";

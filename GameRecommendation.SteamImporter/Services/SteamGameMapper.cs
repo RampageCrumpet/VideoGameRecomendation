@@ -4,6 +4,9 @@ using System.Text.Json;
 
 namespace GameRecommendation.SteamImporter.Services
 {
+    /// <summary>
+    /// Maps raw Steam API JSON responses to <see cref="Game"/> domain models.
+    /// </summary>
     public class SteamGameMapper : ISteamGameMapper
     {
         private readonly ILogger<SteamGameMapper> logger;
@@ -13,6 +16,12 @@ namespace GameRecommendation.SteamImporter.Services
             this.logger = logger;
         }
 
+        /// <summary>
+        /// Maps the raw Steam API JSON response for the given AppId to a <see cref="Game"/> domain model.
+        /// </summary>
+        /// <param name="appId">The Steam AppId of the game being mapped.</param>
+        /// <param name="json">The raw <see cref="JsonDocument"/> returned by the Steam store API.</param>
+        /// <returns>A <see cref="Game"/> domain model, or null if the response was invalid or unsuccessful.</returns>
         public Game? Map(int appId, JsonDocument json)
         {
             if (!json.RootElement.TryGetProperty(appId.ToString(), out var root))
@@ -44,6 +53,12 @@ namespace GameRecommendation.SteamImporter.Services
             };
         }
 
+        /// <summary>
+        /// Attempts to parse the release date from the given <see cref="JsonElement"/>.
+        /// </summary>
+        /// <param name="appId">The Steam AppId of the game being parsed, used for logging.</param>
+        /// <param name="releaseDate">The <see cref="JsonElement"/> containing the release date data.</param>
+        /// <returns>The parsed <see cref="DateTime"/>, or <see cref="DateTime.MinValue"/> if parsing failed.</returns>
         private DateTime ParseReleaseDate(int appId, JsonElement releaseDate)
         {
             if (releaseDate.TryGetProperty("date", out var dateStr) &&

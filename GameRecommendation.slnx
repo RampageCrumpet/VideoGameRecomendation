@@ -4,8 +4,10 @@
   <Project Path="GameRecommendation.Domain/GameRecommendation.Domain.csproj" Id="6db9a75c-f4ca-0533-f31d-9ab62f0c2713" />
   <Project Path="GameRecommendation.Infrastructure.Tests/GameRecommendation.Infrastructure.Tests.csproj" Id="1142839b-99da-4ae8-bc9d-b9ebc005b501" />
   <Project Path="GameRecommendation.Infrastructure/GameRecommendation.Infrastructure.csproj" />
-  <Project Path="GameRecommendation.TestUtilities/GameRecommendation.TestUtilities.csproj" Id="e0eb2536-ceaf-4bb5-880c-73129d486d64" />
   <Project Path="GameRecommendation.SteamImporter.Tests/GameRecommendation.SteamImporter.Tests.csproj" />
   <Project Path="GameRecommendation.SteamImporter/GameRecommendation.SteamImporter.csproj" Id="3d3ee57a-eaab-478a-ad9c-5dcba5625d2e" />
-  <Project Path="GameRecommendation.Web/GameRecommendation.Web.csproj" />
+  <Project Path="GameRecommendation.TestUtilities/GameRecommendation.TestUtilities.csproj" Id="e0eb2536-ceaf-4bb5-880c-73129d486d64" />
+  <Project Path="GameRecommendation.Web/GameRecommendation.Web.csproj">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
 </Solution>
