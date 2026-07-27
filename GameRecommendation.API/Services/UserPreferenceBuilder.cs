@@ -18,7 +18,6 @@ namespace GameRecommendation.API.Services
 
             foreach (var rating in ratings)
             {
-                // If the game doesn't exist in our list of games skip it.
                 if(!gameLookup.TryGetValue(rating.GameId, out var game))
                 {
                     continue;

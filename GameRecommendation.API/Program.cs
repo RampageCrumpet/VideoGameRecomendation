@@ -11,7 +11,8 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // EF Core DbContext
 builder.Services.AddDbContext<RecommendationDbContext>(options =>
@@ -80,7 +81,10 @@ builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
-    app.MapOpenApi();
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
 app.UseCors("BlazorClient");

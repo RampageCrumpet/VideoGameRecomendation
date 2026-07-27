@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using Xunit;
 
 namespace GameRecommendation.API.Tests
 {
@@ -97,10 +98,10 @@ namespace GameRecommendation.API.Tests
             };
 
             // Register
-            var registerResponse = await client.PostAsJsonAsync("api/auth/register", registerPayload);
+            var registerResponse = await client.PostAsJsonAsync("api/auth/register", registerPayload, TestContext.Current.CancellationToken);
             Assert.Equal(System.Net.HttpStatusCode.Created, registerResponse.StatusCode);
 
-            var registerBody = await registerResponse.Content.ReadFromJsonAsync<JsonElement>();
+            var registerBody = await registerResponse.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
             Assert.True(registerBody.TryGetProperty("token", out var tokenElement));
             var token = tokenElement.GetString();
             Assert.False(string.IsNullOrWhiteSpace(token));
@@ -112,10 +113,10 @@ namespace GameRecommendation.API.Tests
                 password = registerPayload.password
             };
 
-            var loginResponse = await client.PostAsJsonAsync("api/auth/login", loginPayload);
+            var loginResponse = await client.PostAsJsonAsync("api/auth/login", loginPayload, TestContext.Current.CancellationToken);
             Assert.Equal(System.Net.HttpStatusCode.OK, loginResponse.StatusCode);
 
-            var loginBody = await loginResponse.Content.ReadFromJsonAsync<JsonElement>();
+            var loginBody = await loginResponse.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
             Assert.True(loginBody.TryGetProperty("token", out var loginTokenElement));
             var loginToken = loginTokenElement.GetString();
             Assert.False(string.IsNullOrWhiteSpace(loginToken));
@@ -123,7 +124,7 @@ namespace GameRecommendation.API.Tests
             // Use token to call protected endpoint
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginToken);
 
-            var protectedResponse = await client.GetAsync("api/recommendations");
+            var protectedResponse = await client.GetAsync("api/recommendations", TestContext.Current.CancellationToken);
 
             Assert.NotEqual(System.Net.HttpStatusCode.Unauthorized, protectedResponse.StatusCode);
         }

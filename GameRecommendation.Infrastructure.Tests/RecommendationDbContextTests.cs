@@ -28,7 +28,7 @@ namespace GameRecommendation.Infrastructure.Tests
             });
 
             await Assert.ThrowsAsync<DbUpdateException>(
-                () => context.SaveChangesAsync());
+                () => context.SaveChangesAsync(TestContext.Current.CancellationToken));
         }
 
         [Fact]
@@ -40,7 +40,7 @@ namespace GameRecommendation.Infrastructure.Tests
             context.Tags.Add(new Tag { Name = null! });
 
             await Assert.ThrowsAsync<DbUpdateException>(
-                () => context.SaveChangesAsync());
+                () => context.SaveChangesAsync(TestContext.Current.CancellationToken));
         }
     }
 }
