@@ -1,34 +1,35 @@
-﻿using GameRecommendation.SteamImporter.Services;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using GameRecommendation.SteamImporter.Services;
 using System.Text.Json;
 
 namespace GameRecommendation.SteamImporter.Tests
 {
     public class SteamTagExtractorTests
     {
-        private SteamTagExtractor Create() => new SteamTagExtractor();
+        private readonly SteamTagExtractor extractor = new();
+
+        private static JsonElement Parse(string json)
+        {
+            var doc = JsonDocument.Parse(json);
+            return doc.RootElement;
+        }
 
         [Fact]
         [Trait("Category", "Unit")]
         public void Extract_ReturnsTagsFromGenresAndCategories()
         {
-            var json = @"
+            var element = Parse("""
             {
-                ""genres"": [
-                    { ""description"": ""Action"" },
-                    { ""description"": ""Adventure"" }
+                "genres": [
+                    { "description": "Action" },
+                    { "description": "Adventure" }
                 ],
-                ""categories"": [
-                    { ""description"": ""Co-op"" }
+                "categories": [
+                    { "description": "Co-op" }
                 ]
-            }";
+            }
+            """);
 
-            using var doc = JsonDocument.Parse(json);
-            var extractor = Create();
-
-            var tags = extractor.Extract(doc.RootElement).ToList();
+            var tags = extractor.Extract(element).ToList();
 
             Assert.Contains("Action", tags);
             Assert.Contains("Adventure", tags);
@@ -38,67 +39,129 @@ namespace GameRecommendation.SteamImporter.Tests
 
         [Fact]
         [Trait("Category", "Unit")]
-        public void Extract_IgnoresDuplicatesAndWhitespace()
+        public void Extract_DeduplicatesTags()
         {
-            var json = @"
+            var element = Parse("""
             {
-                ""genres"": [
-                    { ""description"": ""Action"" },
-                    { ""description"": ""Action"" },
-                    { ""description"": ""  "" }
+                "genres": [
+                    { "description": "Action" },
+                    { "description": "Action" }
                 ],
-                ""categories"": [
-                    { ""description"": ""Action"" },
-                    { ""description"": ""Co-op"" }
+                "categories": [
+                    { "description": "Action" }
                 ]
-            }";
+            }
+            """);
 
-            using var doc = JsonDocument.Parse(json);
-            var extractor = Create();
+            var tags = extractor.Extract(element).ToList();
 
-            var tags = extractor.Extract(doc.RootElement).ToList();
+            Assert.Single(tags);
+            Assert.Equal("Action", tags[0]);
+        }
 
-            Assert.Contains("Action", tags);
-            Assert.Contains("Co-op", tags);
-            Assert.Equal(2, tags.Count);
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Extract_IgnoresWhitespaceOnlyEntries()
+        {
+            var element = Parse("""
+            {
+                "genres": [
+                    { "description": "   " },
+                    { "description": "Action" }
+                ],
+                "categories": []
+            }
+            """);
+
+            var tags = extractor.Extract(element).ToList();
+
+            Assert.Single(tags);
+            Assert.Equal("Action", tags[0]);
         }
 
         [Fact]
         [Trait("Category", "Unit")]
         public void Extract_ReturnsEmpty_WhenNoRelevantProperties()
         {
-            var json = @"{ }";
+            var element = Parse("{}");
 
-            using var doc = JsonDocument.Parse(json);
-            var extractor = Create();
-
-            var tags = extractor.Extract(doc.RootElement);
+            var tags = extractor.Extract(element);
 
             Assert.Empty(tags);
         }
 
         [Fact]
         [Trait("Category", "Unit")]
-        public void Extract_IgnoresItemsWithoutDescription()
+        public void Extract_IgnoresItemsWithoutDescriptionProperty()
         {
-            var json = @"
+            var element = Parse("""
             {
-                ""genres"": [
-                    { ""id"": 1 },
-                    { ""description"": ""Strategy"" }
+                "genres": [
+                    { "id": 1 },
+                    { "description": "Strategy" }
                 ],
-                ""categories"": [
-                    { ""somethingElse"": ""x"" }
+                "categories": [
+                    { "somethingElse": "x" }
                 ]
-            }";
+            }
+            """);
 
-            using var doc = JsonDocument.Parse(json);
-            var extractor = Create();
+            var tags = extractor.Extract(element).ToList();
 
-            var tags = extractor.Extract(doc.RootElement).ToList();
-
-            Assert.Contains("Strategy", tags);
             Assert.Single(tags);
+            Assert.Equal("Strategy", tags[0]);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Extract_ReturnsEmpty_WhenGenresAndCategoriesAreEmpty()
+        {
+            var element = Parse("""
+            {
+                "genres": [],
+                "categories": []
+            }
+            """);
+
+            var tags = extractor.Extract(element);
+
+            Assert.Empty(tags);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Extract_ReturnsOnlyGenres_WhenCategoriesMissing()
+        {
+            var element = Parse("""
+            {
+                "genres": [
+                    { "description": "RPG" }
+                ]
+            }
+            """);
+
+            var tags = extractor.Extract(element).ToList();
+
+            Assert.Single(tags);
+            Assert.Equal("RPG", tags[0]);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Extract_ReturnsOnlyCategories_WhenGenresMissing()
+        {
+            var element = Parse("""
+            {
+                "categories": [
+                    { "description": "Multiplayer" }
+                ]
+            }
+            """);
+
+            var tags = extractor.Extract(element).ToList();
+
+            Assert.Single(tags);
+            Assert.Equal("Multiplayer", tags[0]);
         }
     }
 }

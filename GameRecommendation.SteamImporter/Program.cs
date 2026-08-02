@@ -24,9 +24,7 @@ builder.Services.AddTransient<ISteamGameMapper, SteamGameMapper>();
 builder.Services.AddTransient<ISteamTagExtractor, SteamTagExtractor>();
 builder.Services.AddTransient<SteamImportRunner>();
 
-var connString = builder.Configuration.GetConnectionString("DefaultConnection");
-Console.WriteLine($"Connection string: {connString}");
-Console.Out.Flush();
+builder.Configuration.GetConnectionString("DefaultConnection");
 
 using var host = builder.Build();
 

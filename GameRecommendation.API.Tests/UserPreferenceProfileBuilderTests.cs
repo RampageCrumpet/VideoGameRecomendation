@@ -6,38 +6,32 @@ namespace GameRecommendation.API.Tests
 {
     public class UserPreferenceProfileBuilderTests
     {
+        private readonly UserPreferenceBuilder builder = new();
+
+        private static Game MakeGame(int id, params int[] tagIds) => new()
+        {
+            Id = id,
+            Name = $"Game {id}",
+            Description = $"Description for game {id}",
+            ImageUrl = $"https://image/{id}.jpg",
+            GameTags = tagIds.Select(t => new GameTag { GameId = id, TagId = t }).ToList()
+        };
+
+        private static UserRating MakeRating(int gameId, RatingType rating) => new()
+        {
+            GameId = gameId,
+            Rating = rating
+        };
+
         [Fact]
         [Trait("Category", "Unit")]
         public void Liked_Game_Increases_Tag_Weight()
         {
-            // Arrange
-            var game = new Game
-            {
-                Name = "testName",
-                Description = "testDescription",
-                ImageUrl = "testStringUrl",
-                Id = 1,
-                GameTags = new List<GameTag>
-                {
-                    new GameTag { GameId = 1, TagId = 10 }
-                }
-            };
+            var game = MakeGame(1, 10);
+            var ratings = new[] { MakeRating(1, RatingType.Like) };
 
-            var ratings = new List<UserRating>
-            {
-                new UserRating
-                {
-                    GameId = 1,
-                    Rating = RatingType.Like
-                }
-            };
-
-            var builder = new UserPreferenceBuilder();
-
-            // Act
             var profile = builder.Build(ratings, new[] { game });
 
-            // Assert
             Assert.Equal(1.0, profile.TagWeights[10]);
         }
 
@@ -45,221 +39,115 @@ namespace GameRecommendation.API.Tests
         [Trait("Category", "Unit")]
         public void Disliked_Game_Decreases_Tag_Weight()
         {
-            //Arrange
-            var game = new Game
-            {
-                Name = "testName",
-                Description = "testDescription",
-                ImageUrl = "testStringUrl",
-                Id = 1,
-                GameTags = new List<GameTag>
-                {
-                    new GameTag { GameId = 1, TagId = 10 }
-                }
-            };
+            var game = MakeGame(1, 10);
+            var ratings = new[] { MakeRating(1, RatingType.Dislike) };
 
-            var ratings = new List<UserRating>
-            {
-                new UserRating
-                {
-                    GameId = 1,
-                    Rating = RatingType.Dislike
-                }
-            };
-
-            var builder = new UserPreferenceBuilder();
-
-            // Act
             var profile = builder.Build(ratings, new[] { game });
 
-            // Assert
             Assert.Equal(-1.0, profile.TagWeights[10]);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Skipped_Game_Does_Not_Change_Tag_Weight()
+        {
+            var game = MakeGame(1, 10);
+            var ratings = new[] { MakeRating(1, RatingType.Skip) };
+
+            var profile = builder.Build(ratings, new[] { game });
+
+            Assert.Equal(0.0, profile.TagWeights[10]);
         }
 
         [Fact]
         [Trait("Category", "Unit")]
         public void Multiple_Likes_Accumulate_Tag_Weight()
         {
-            var game1 = new Game
-            {
-                Name = "first game",
-                Description = "I am the first game.",
-                ImageUrl = "first game test Url",
-                Id = 1,
-                GameTags = new List<GameTag>
-                {
-                    new GameTag { GameId = 1, TagId = 10 }
-                }
-            };
-
-            var game2 = new Game
-            {
-                Name = "secondGame",
-                Description = "I am the second game.",
-                ImageUrl = "second game test Url",
-                Id = 2,
-                GameTags = new List<GameTag>
-                {
-                    new GameTag { GameId = 2, TagId = 10 }
-                }
-            };
-
-            var ratings = new List<UserRating>
-            {
-                new UserRating { GameId = 1, Rating = RatingType.Like },
-                new UserRating { GameId = 2, Rating = RatingType.Like }
-            };
-
-            var builder = new UserPreferenceBuilder();
+            var game1 = MakeGame(1, 10);
+            var game2 = MakeGame(2, 10);
+            var ratings = new[] { MakeRating(1, RatingType.Like), MakeRating(2, RatingType.Like) };
 
             var profile = builder.Build(ratings, new[] { game1, game2 });
 
             Assert.Equal(2.0, profile.TagWeights[10]);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Like_And_Dislike_On_Same_Tag_Cancel_Out()
+        {
+            var game1 = MakeGame(1, 10);
+            var game2 = MakeGame(2, 10);
+            var ratings = new[] { MakeRating(1, RatingType.Like), MakeRating(2, RatingType.Dislike) };
+
+            var profile = builder.Build(ratings, new[] { game1, game2 });
+
+            Assert.Equal(0.0, profile.TagWeights[10]);
         }
 
         [Fact]
         [Trait("Category", "Unit")]
         public void Game_With_Multiple_Tags_Updates_All_Tags()
         {
-            //Arrange
-            var game = new Game
-            {
-                Name = "testName",
-                Description = "testDescription",
-                ImageUrl = "testStringUrl",
-                Id = 1,
-                GameTags = new List<GameTag>
-                {
-                    new GameTag { GameId = 1, TagId = 10 },
-                    new GameTag { GameId = 1, TagId = 20 }
-                }
-            };
+            var game = MakeGame(1, 10, 20);
+            var ratings = new[] { MakeRating(1, RatingType.Like) };
 
-            var ratings = new List<UserRating>
-            {
-                new UserRating
-                {
-                    GameId = 1,
-                    Rating = RatingType.Like
-                }
-            };
-
-            var builder = new UserPreferenceBuilder();
-
-            //Act
             var profile = builder.Build(ratings, new[] { game });
 
-            //Assert
             Assert.Equal(1.0, profile.TagWeights[10]);
             Assert.Equal(1.0, profile.TagWeights[20]);
         }
 
         [Fact]
         [Trait("Category", "Unit")]
-        public void Liked_Game_Increases_Tag_Weights()
+        public void Rating_For_Unknown_Game_Is_Ignored()
         {
-            // Arrange
-            var game = new Game
-            {
-                Name = "testName",
-                Description = "testDescription",
-                ImageUrl = "testStringUrl",
-                Id = 1,
-                GameTags = new List<GameTag>
-                {
-                    new GameTag { GameId = 1, TagId = 10 }
-                }
-            };
+            var game = MakeGame(1, 10);
+            var ratings = new[] { MakeRating(999, RatingType.Like) };
 
-            var ratings = new List<UserRating>
-            {
-                new UserRating
-                {
-                    GameId = 1,
-                    Rating = RatingType.Like
-                }
-            };
-
-            var builder = new UserPreferenceBuilder();
-
-            // Act
             var profile = builder.Build(ratings, new[] { game });
 
-            // Assert
-            Assert.Equal(1.0, profile.TagWeights[10]);
+            Assert.Empty(profile.TagWeights);
         }
 
         [Fact]
         [Trait("Category", "Unit")]
-        public void Disliked_Game_Decreases_Tag_Weights()
+        public void Empty_Ratings_Returns_Empty_Profile()
         {
-            var game = new Game
-            {
-                Name = "testName",
-                Description = "testDescription",
-                ImageUrl = "testStringUrl",
-                Id = 1,
-                GameTags = new List<GameTag>
-                {
-                    new GameTag { GameId = 1, TagId = 10 }
-                }
-            };
+            var game = MakeGame(1, 10);
 
-            var ratings = new List<UserRating>
-            {
-                new UserRating
-                {
-                    GameId = 1,
-                    Rating = RatingType.Dislike
-                }
-            };
+            var profile = builder.Build(Array.Empty<UserRating>(), new[] { game });
 
-            var builder = new UserPreferenceBuilder();
-
-            var profile = builder.Build(ratings, new[] { game });
-
-            Assert.Equal(-1.0, profile.TagWeights[10]);
+            Assert.Empty(profile.TagWeights);
         }
 
         [Fact]
         [Trait("Category", "Unit")]
-        public void Multiple_Likes_Accumulate_Tag_Weights()
+        public void Empty_Games_Returns_Empty_Profile()
         {
-            var game1 = new Game
-            {
-                Name = "first game",
-                Description = "I am the first game.",
-                ImageUrl = "first game test Url",
-                Id = 1,
-                GameTags = new List<GameTag>
-                {
-                    new GameTag { GameId = 1, TagId = 10 }
-                }
-            };
+            var ratings = new[] { MakeRating(1, RatingType.Like) };
 
-            var game2 = new Game
-            {
-                Name = "secondGame",
-                Description = "I am the second game.",
-                ImageUrl = "second game test Url",
-                Id = 2,
-                GameTags = new List<GameTag>
-                {
-                    new GameTag { GameId = 2, TagId = 10 }
-                }
-            };
+            var profile = builder.Build(ratings, Array.Empty<Game>());
 
-            var ratings = new List<UserRating>
-            {
-                new UserRating { GameId = 1, Rating = RatingType.Like },
-                new UserRating { GameId = 2, Rating = RatingType.Like }
-            };
+            Assert.Empty(profile.TagWeights);
+        }
 
-            var builder = new UserPreferenceBuilder();
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Different_Tags_On_Different_Games_Are_Tracked_Independently()
+        {
+            var game1 = MakeGame(1, 10);
+            var game2 = MakeGame(2, 20);
+            var ratings = new[]
+            {
+                MakeRating(1, RatingType.Like),
+                MakeRating(2, RatingType.Dislike)
+            };
 
             var profile = builder.Build(ratings, new[] { game1, game2 });
 
-            Assert.Equal(2.0, profile.TagWeights[10]);
+            Assert.Equal(1.0, profile.TagWeights[10]);
+            Assert.Equal(-1.0, profile.TagWeights[20]);
         }
     }
 }
