@@ -1,7 +1,7 @@
 namespace GameRecommendation.Domain.Models.Domain
 {
     /// <summary>
-    /// This class is a data object that represents a video game.
+    /// Represents a video game.
     /// </summary>
     public class Game
     {

@@ -1,7 +1,7 @@
 namespace GameRecommendation.Domain.Models.Domain
 {
     /// <summary>
-    /// This class represents the relationship between a game and a tag.
+    /// Represents the relationship between a game and a tag.
     /// </summary>
     public class GameTag
     {
