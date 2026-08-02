@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GameRecommendation.Infrastructure\GameRecommendation.Infrastructure.csproj" />
+    <ProjectReference Include="..\GameRecommendation.TestUtilities\GameRecommendation.TestUtilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

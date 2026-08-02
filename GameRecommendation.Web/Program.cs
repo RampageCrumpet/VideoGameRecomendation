@@ -15,6 +15,9 @@ var apiBaseAddress = builder.Configuration["ApiBaseAddress"]
 builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(apiBaseAddress) });
 
 builder.Services.AddAuthorizationCore();
+
+// Registered twice: once as the base type for the Blazor auth framework,
+// and once as the concrete type so services can inject it directly to call GetToken().
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
 builder.Services.AddScoped<JwtAuthenticationStateProvider>();
 

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GameRecommendation.Infrastructure.Data
 {
@@ -8,6 +9,7 @@ namespace GameRecommendation.Infrastructure.Data
     /// </summary>
     /// <param name="args">Command-line arguments passed by EF Core tooling. Not used.</param>
     /// <returns>A <see cref="RecommendationDbContext"/> configured with the local SQL Server connection string.</returns>
+    [ExcludeFromCodeCoverage(Justification = "Design-time only factory used by EF Core tooling for migrations. Not executed at runtime or during testing.")]
     public class RecommendationDbContextFactory : IDesignTimeDbContextFactory<RecommendationDbContext>
     {
         public RecommendationDbContext CreateDbContext(string[] args)

@@ -1,6 +1,7 @@
 using GameRecommendation.Domain.Models.Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GameRecommendation.Infrastructure.Data
 {
@@ -16,6 +17,7 @@ namespace GameRecommendation.Infrastructure.Data
         public DbSet<User> RatingUsers => Set<User>();
         public DbSet<UserRating> UserRatings => Set<UserRating>();
 
+        [ExcludeFromCodeCoverage(Justification = "EF Core model configuration is SQL Server-specific and cannot be meaningfully exercised by the InMemory provider used in tests.")]
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -29,6 +31,7 @@ namespace GameRecommendation.Infrastructure.Data
             ConfigureUsers(modelBuilder);
         }
 
+        [ExcludeFromCodeCoverage(Justification = "EF Core model configuration is SQL Server-specific and cannot be meaningfully exercised by the InMemory provider used in tests.")]
         private static void ConfigureGames(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Game>(entity =>
@@ -60,6 +63,7 @@ namespace GameRecommendation.Infrastructure.Data
             });
         }
 
+        [ExcludeFromCodeCoverage(Justification = "EF Core model configuration is SQL Server-specific and cannot be meaningfully exercised by the InMemory provider used in tests.")]
         private static void ConfigureTags(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Tag>(entity =>
@@ -79,6 +83,7 @@ namespace GameRecommendation.Infrastructure.Data
             });
         }
 
+        [ExcludeFromCodeCoverage(Justification = "EF Core model configuration is SQL Server-specific and cannot be meaningfully exercised by the InMemory provider used in tests.")]
         private static void ConfigureGameTags(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<GameTag>(entity =>
@@ -98,6 +103,7 @@ namespace GameRecommendation.Infrastructure.Data
             });
         }
 
+        [ExcludeFromCodeCoverage(Justification = "EF Core model configuration is SQL Server-specific and cannot be meaningfully exercised by the InMemory provider used in tests.")]
         private static void ConfigureUserRatings(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserRating>(entity =>
@@ -120,6 +126,7 @@ namespace GameRecommendation.Infrastructure.Data
             });
         }
 
+        [ExcludeFromCodeCoverage(Justification = "EF Core model configuration is SQL Server-specific and cannot be meaningfully exercised by the InMemory provider used in tests.")]
         private static void ConfigureUsers(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>(entity =>

@@ -54,7 +54,7 @@ namespace GameRecommendation.SteamImporter.Tests
         {
             var harness = new SteamImportTestHarness();
             harness.Database.Games.Add(MakeGame(123, "Existing Game"));
-            await harness.Database.SaveChangesAsync();
+            await harness.Database.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var response = MakeSteamResponse(123);
             harness.Fetcher.Setup(f => f.GetGameAsync(123)).ReturnsAsync(response);
@@ -72,7 +72,7 @@ namespace GameRecommendation.SteamImporter.Tests
         {
             var harness = new SteamImportTestHarness();
             harness.Database.Games.Add(MakeGame(123, "Old Name"));
-            await harness.Database.SaveChangesAsync();
+            await harness.Database.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var response = MakeSteamResponse(123);
             harness.Fetcher.Setup(f => f.GetGameAsync(123)).ReturnsAsync(response);

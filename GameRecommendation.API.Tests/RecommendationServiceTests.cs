@@ -66,7 +66,7 @@ namespace GameRecommendation.API.Tests
             dbContext.Games.AddRange(ratedGame, unratedGame);
             dbContext.RatingUsers.Add(user);
             dbContext.UserRatings.Add(MakeRating("user1", 1, RatingType.Like));
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var result = await service.GetRecommendationsAsync("user1", 1, 20);
 
@@ -86,7 +86,7 @@ namespace GameRecommendation.API.Tests
             dbContext.Games.Add(game);
             dbContext.RatingUsers.Add(user);
             dbContext.UserRatings.Add(MakeRating("user1", 1, RatingType.Like));
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var result = await service.GetRecommendationsAsync("user1", 1, 20);
 
@@ -101,7 +101,7 @@ namespace GameRecommendation.API.Tests
             dbContext.Tags.Add(tag);
             dbContext.Games.AddRange(MakeGame(1, "Game 1", 1), MakeGame(2, "Game 2", 1));
             dbContext.RatingUsers.Add(MakeUser("user1"));
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var result = await service.GetRecommendationsAsync("user1", 1, 20);
 
@@ -123,7 +123,7 @@ namespace GameRecommendation.API.Tests
             dbContext.Games.AddRange(actionGame, rpgGame, actionAndRpgGame);
             dbContext.RatingUsers.Add(user);
             dbContext.UserRatings.Add(MakeRating("user1", 1, RatingType.Like));
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var result = await service.GetRecommendationsAsync("user1", 1, 20);
 
@@ -142,7 +142,7 @@ namespace GameRecommendation.API.Tests
                 MakeGame(2, "Game 2", 1),
                 MakeGame(3, "Game 3", 1));
             dbContext.RatingUsers.Add(MakeUser("user1"));
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var result = await service.GetRecommendationsAsync("user1", 1, 2);
 
@@ -161,7 +161,7 @@ namespace GameRecommendation.API.Tests
                 MakeGame(2, "Game 2", 1),
                 MakeGame(3, "Game 3", 1));
             dbContext.RatingUsers.Add(MakeUser("user1"));
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var page1 = await service.GetRecommendationsAsync("user1", 1, 2);
             var page2 = await service.GetRecommendationsAsync("user1", 2, 2);
@@ -182,7 +182,7 @@ namespace GameRecommendation.API.Tests
             dbContext.Games.AddRange(game1, game2);
             dbContext.RatingUsers.AddRange(MakeUser("user1"), MakeUser("user2"));
             dbContext.UserRatings.Add(MakeRating("user2", 1, RatingType.Like));
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var result = await service.GetRecommendationsAsync("user1", 1, 20);
 
