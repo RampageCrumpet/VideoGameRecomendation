@@ -32,13 +32,8 @@ namespace GameRecommendation.API.Services
 
                 foreach (var tag in game.GameTags)
                 {
-                    // If we can't find the tag in our dictionary, initialize it with a weight of 0. This sets it to no preference.
-                    if (!tagWeights.ContainsKey(tag.TagId))
-                    {
-                        tagWeights[tag.TagId] = 0;
-                    }
-
-                    tagWeights[tag.TagId] += impact;
+                    // Use GetValueOrDefault so missing keys default to 0 and we can add the impact directly.
+                    tagWeights[tag.TagId] = tagWeights.GetValueOrDefault(tag.TagId) + impact;
                 }
             }
 

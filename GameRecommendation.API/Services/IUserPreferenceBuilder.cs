@@ -12,7 +12,7 @@ namespace GameRecommendation.API.Services
         /// Builds a user preference profile based on the user's historical ratings and the games they've rated.
         /// </summary>
         /// <param name="ratings"> A collection of the users <see cref="UserRating"/>s used to build their preferences.</param>
-        /// <param name="games"> A collection of <see cref="Game"/>s we rated.</param>
+        /// <param name="games"> A collection of <see cref="Game"/>s the user rated.</param>
         /// <returns>Returns a <see cref="UserPreferenceProfile"/> </returns>
         UserPreferenceProfile Build(IEnumerable<UserRating> ratings, IEnumerable<Game> games);
     }

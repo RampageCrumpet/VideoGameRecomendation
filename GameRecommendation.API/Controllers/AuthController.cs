@@ -100,7 +100,7 @@ namespace GameRecommendation.API.Controllers
             catch (InvalidOperationException ex)
             {
                 // multiple users found for the given email
-                logger?.LogError(ex, "Multiple users with same email found: {Email}", request.Email);
+                logger.LogError(ex, "Multiple users with same email found: {Email}", request.Email);
                 return Problem(detail: "Multiple accounts exist for this email address. Please contact support.", statusCode: StatusCodes.Status400BadRequest);
             }
         }

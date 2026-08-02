@@ -2,6 +2,11 @@
 
 namespace GameRecommendation.API.DataTransferObjects.Games
 {
+    /// <summary>
+    /// Represents a lightweight summary of a game returned by list endpoints.
+    /// Contains identifying and display information (id, name, image, release date)
+    /// and the calling user's rating when available.
+    /// </summary>
     public class GameSummaryDto
     {
         /// <summary>
