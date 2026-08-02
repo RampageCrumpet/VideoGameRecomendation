@@ -3,6 +3,11 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace GameRecommendation.Infrastructure.Data
 {
+    /// <summary>
+    /// Creates a <see cref="RecommendationDbContext"/> configured for design-time use.
+    /// </summary>
+    /// <param name="args">Command-line arguments passed by EF Core tooling. Not used.</param>
+    /// <returns>A <see cref="RecommendationDbContext"/> configured with the local SQL Server connection string.</returns>
     public class RecommendationDbContextFactory : IDesignTimeDbContextFactory<RecommendationDbContext>
     {
         public RecommendationDbContext CreateDbContext(string[] args)
