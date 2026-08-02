@@ -15,6 +15,7 @@ namespace GameRecommendation.Web.Auth
 
         private readonly IJSRuntime js;
         private const string TokenKey = "authToken";
+        private string? _cachedToken;
 
         public JwtAuthenticationStateProvider(IJSRuntime js)
         {
@@ -38,10 +39,12 @@ namespace GameRecommendation.Web.Auth
         /// </summary>
         public async Task NotifyUserAuthenticated(string jwtToken)
         {
+            _cachedToken = jwtToken;
             await js.InvokeVoidAsync("localStorage.setItem", TokenKey, jwtToken);
             var identity = new ClaimsIdentity(ParseClaimsFromJwt(jwtToken), "jwt");
             NotifyAuthenticationStateChanged(
                 Task.FromResult(new AuthenticationState(new ClaimsPrincipal(identity))));
+
         }
 
         /// <summary>
@@ -49,6 +52,7 @@ namespace GameRecommendation.Web.Auth
         /// </summary>
         public async Task NotifyUserLoggedOut()
         {
+            _cachedToken = null;
             await js.InvokeVoidAsync("localStorage.removeItem", TokenKey);
             NotifyAuthenticationStateChanged(Task.FromResult(Anonymous));
         }
@@ -56,8 +60,23 @@ namespace GameRecommendation.Web.Auth
         /// <summary>
         /// Returns the stored JWT from localStorage for attaching to outgoing HTTP requests, or null if not authenticated.
         /// </summary>
-        public async Task<string?> GetToken() =>
-            await js.InvokeAsync<string?>("localStorage.getItem", TokenKey);
+        public async Task<string?> GetToken()
+        {
+            if (_cachedToken != null)
+                return _cachedToken;
+
+            try
+            {
+                var token = await js.InvokeAsync<string?>("localStorage.getItem", TokenKey);
+                if (token != null)
+                    _cachedToken = token;
+                return token;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         private static IEnumerable<Claim> ParseClaimsFromJwt(string jwtToken)
         {

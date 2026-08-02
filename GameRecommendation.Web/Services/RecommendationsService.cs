@@ -24,9 +24,11 @@ namespace GameRecommendation.Web.Services
         /// </summary>
         public async Task<PagedResult<RecommendationResponse>?> GetRecommendationsAsync(int page = 1, int pageSize = 20)
         {
-            await AttachTokenAsync();
-            return await httpClient.GetFromJsonAsync<PagedResult<RecommendationResponse>>(
+            var response = await httpClient.GetAsync(
                 $"api/recommendations?page={page}&pageSize={pageSize}");
+            if (!response.IsSuccessStatusCode)
+                return null;
+            return await response.Content.ReadFromJsonAsync<PagedResult<RecommendationResponse>>();
         }
 
         private async Task AttachTokenAsync()

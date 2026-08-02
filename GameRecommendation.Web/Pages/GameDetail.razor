@@ -38,7 +38,7 @@ else
                 <RatingControl GameId="@game.Id" CurrentRating="@game.UserRating" OnRatingChanged="RefreshGame" />
             </div>
 
-            <button class="btn btn-outline-secondary mt-3" @onclick='() => Navigation.NavigateTo("/games")'>
+            <button class="btn btn-outline-secondary mt-3" @onclick='() => Navigation.NavigateTo("/my-ratings")'>
                 Back to Games
             </button>
         </div>

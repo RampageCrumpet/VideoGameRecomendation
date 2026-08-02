@@ -47,7 +47,7 @@
         var (success, error) = await AuthService.RegisterAsync(userName, email, password);
 
         if (success)
-            Navigation.NavigateTo("/games");
+            Navigation.NavigateTo("/rate");
         else
             errorMessage = error;
 

@@ -23,14 +23,33 @@ namespace GameRecommendation.Web.Services
         /// <summary>
         /// Returns a paginated, searchable list of games.
         /// </summary>
-        public async Task<PagedResult<GameSummaryResponse>?> GetGamesAsync(int page = 1, int pageSize = 20, string? search = null)
+        public async Task<PagedResult<GameSummaryResponse>?> GetGamesAsync(int page = 1, int pageSize = 20, string? search = null, bool ratedOnly = true)
         {
             await AttachTokenAsync();
-            var url = $"api/games?page={page}&pageSize={pageSize}";
+            var url = $"api/games?page={page}&pageSize={pageSize}&ratedOnly={ratedOnly.ToString().ToLower()}";
             if (!string.IsNullOrWhiteSpace(search))
                 url += $"&search={Uri.EscapeDataString(search)}";
 
-            return await httpClient.GetFromJsonAsync<PagedResult<GameSummaryResponse>>(url);
+            var response = await httpClient.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+                return null;
+            return await response.Content.ReadFromJsonAsync<PagedResult<GameSummaryResponse>>();
+        }
+
+        /// <summary>
+        /// Returns a single unrated game for the current user, or null when none available.
+        /// </summary>
+        public async Task<GameDetailResponse?> GetUnratedGameAsync()
+        {
+            await AttachTokenAsync();
+            var response = await httpClient.GetAsync("api/games/unrated");
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return null;
+
+            if (response.IsSuccessStatusCode)
+                return await response.Content.ReadFromJsonAsync<GameDetailResponse>();
+
+            return null;
         }
 
         /// <summary>
@@ -66,7 +85,7 @@ namespace GameRecommendation.Web.Services
             public string Description { get; set; } = string.Empty;
             public string ImageUrl { get; set; } = string.Empty;
             public DateTime ReleaseDate { get; set; }
-            public IEnumerable<string> Tags { get; set; } = [];
+            public IEnumerable<string> Tags { get; set; } = new List<string>();
             public RatingType? UserRating { get; set; }
         }
     }

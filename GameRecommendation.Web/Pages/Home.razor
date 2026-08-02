@@ -1,14 +1,14 @@
-﻿@page "/"
-
-<AuthorizeView>
-    <Authorized>
-        @{
-            Navigation.NavigateTo("/games");
-        }
-    </Authorized>
-    <NotAuthorized>
-        <RedirectToLogin />
-    </NotAuthorized>
-</AuthorizeView>
-
+@page "/"
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+            Navigation.NavigateTo("/rate", replace: true);
+        else
+            Navigation.NavigateTo("/login");
+    }
+}

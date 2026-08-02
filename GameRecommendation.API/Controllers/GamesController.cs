@@ -22,14 +22,17 @@ namespace GameRecommendation.API.Controllers
         }
 
         /// <summary>
-        /// Returns a paginated, searchable list of all games.
+        /// Returns a paginated, searchable list of games.
+        /// By default this endpoint returns only games the current user has rated. If a search term is provided,
+        /// results will include unrated games that match the search.
         /// </summary>
         /// <param name="search">Optional search term to filter games by name.</param>
         /// <param name="page">The one-based page number. Defaults to 1.</param>
         /// <param name="pageSize">The number of results per page. Defaults to 20.</param>
+        /// <param name="ratedOnly">When true (default) limits results to games the user has rated when not searching.</param>
         [HttpGet]
         [ProducesResponseType(typeof(PagedResultDto<GameSummaryDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetGames([FromQuery] string? search,[FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetGames([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] bool ratedOnly = true)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -38,7 +41,20 @@ namespace GameRecommendation.API.Controllers
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
-                query = query.Where(game => game.Name.Contains(search));
+            {
+                var s = search.Trim();
+                query = query.Where(game =>
+                    game.Name.Contains(s) ||
+                    game.Description.Contains(s) ||
+                    game.GameTags.Any(gt => gt.Tag.Name.Contains(s))
+                );
+            }
+
+            // If ratedOnly is requested and there is no search term, filter to only games the user has rated.
+            if (ratedOnly && string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(game => game.UserRatings.Any(rating => rating.UserId == userId));
+            }
 
             var totalCount = await query.CountAsync();
 
@@ -99,6 +115,38 @@ namespace GameRecommendation.API.Controllers
 
             if (game == null)
                 return NotFound();
+
+            return Ok(game);
+        }
+
+        /// <summary>
+        /// Returns a single unrated game for the current user (randomized).
+        /// </summary>
+        [HttpGet("unrated")]
+        [ProducesResponseType(typeof(GameDetailDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> GetUnrated()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var game = await dbContext.Games
+                .AsNoTracking()
+                .Where(g => !g.UserRatings.Any(r => r.UserId == userId))
+                .OrderBy(g => Guid.NewGuid())
+                .Select(g => new GameDetailDto
+                {
+                    Id = g.Id,
+                    Name = g.Name,
+                    Description = g.Description,
+                    ImageUrl = g.ImageUrl,
+                    ReleaseDate = g.ReleaseDate,
+                    Tags = g.GameTags.Select(gt => gt.Tag.Name),
+                    UserRating = null
+                })
+                .FirstOrDefaultAsync();
+
+            if (game == null)
+                return NoContent();
 
             return Ok(game);
         }

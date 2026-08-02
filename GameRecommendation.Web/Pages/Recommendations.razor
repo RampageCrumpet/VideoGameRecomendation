@@ -16,11 +16,14 @@ else if (recommendations == null)
 else if (!recommendations.Items.Any())
 {
     <div class="alert alert-info">
-        No recommendations yet. <a href="/games">Rate some games</a> to get started.
+        No recommendations yet. <a href="/rate">rate some games</a> to get started.
     </div>
 }
 else
 {
+    <div class="d-flex justify-content-end mb-3">
+        <a href="/rate" class="btn btn-outline-primary">Rate More Games</a>
+    </div>
     <div class="row row-cols-1 row-cols-md-3 g-4">
         @foreach (var recommendation in recommendations.Items)
         {

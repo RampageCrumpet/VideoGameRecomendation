@@ -1,0 +1,60 @@
+@page "/rate"
+@attribute [Authorize]
+@inject GameRecommendation.Web.Services.GamesService GamesService
+@inject GameRecommendation.Web.Services.RatingsService RatingsService
+@inject NavigationManager Navigation
+
+<h2 class="mb-4">Rate Games</h2>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (game == null)
+{
+    <div class="alert alert-info">
+        You're all caught up! Check your <a href="/recommendations">recommendations</a>.
+    </div>
+}
+else
+{
+    <div class="d-flex justify-content-center">
+        <div class="card" style="width: 24rem;">
+            <img src="@game.ImageUrl" alt="@game.Name" class="card-img-top" />
+            <div class="card-body text-center">
+                <h4>@game.Name</h4>
+                <p class="text-muted">Released @game.ReleaseDate.ToString("MMMM yyyy")</p>
+                <p>@game.Description</p>
+                <div class="d-flex gap-2 justify-content-center mt-3">
+                    <button class="btn btn-success" @onclick="() => HandleRating(GameRecommendation.Domain.Enums.RatingType.Like)">👍 Like</button>
+                    <button class="btn btn-secondary" @onclick="() => HandleRating(GameRecommendation.Domain.Enums.RatingType.Skip)">⏭ Skip</button>
+                    <button class="btn btn-danger" @onclick="() => HandleRating(GameRecommendation.Domain.Enums.RatingType.Dislike)">👎 Dislike</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private GameRecommendation.Web.Services.GamesService.GameDetailResponse? game;
+    private bool isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        game = await GamesService.GetUnratedGameAsync();
+        isLoading = false;
+    }
+
+    private async Task HandleRating(GameRecommendation.Domain.Enums.RatingType rating)
+    {
+        if (game == null)
+            return;
+
+        isLoading = true;
+        await RatingsService.UpsertRatingAsync(game.Id, rating);
+        game = await GamesService.GetUnratedGameAsync();
+        isLoading = false;
+        StateHasChanged();
+    }
+}

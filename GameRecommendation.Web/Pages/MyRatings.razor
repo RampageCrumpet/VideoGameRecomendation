@@ -1,9 +1,9 @@
-﻿@page "/games"
+@page "/my-ratings"
 @attribute [Authorize]
-@inject GamesService GamesService
-@inject RatingsService RatingsService
+@inject GameRecommendation.Web.Services.GamesService GamesService
+@inject GameRecommendation.Web.Services.RatingsService RatingsService
 
-<h2 class="mb-4">Browse Games</h2>
+<h2 class="mb-4">My Ratings</h2>
 
 <div class="row mb-3">
     <div class="col-md-6">
@@ -13,6 +13,8 @@
         </div>
     </div>
 </div>
+
+
 
 @if (isLoading)
 {
@@ -53,7 +55,7 @@ else
 }
 
 @code {
-    private PagedResult<GamesService.GameSummaryResponse>? games;
+    private PagedResult<GameRecommendation.Web.Services.GamesService.GameSummaryResponse>? games;
     private string searchTerm = string.Empty;
     private int currentPage = 1;
     private bool isLoading;
@@ -66,7 +68,7 @@ else
     private async Task LoadGames()
     {
         isLoading = true;
-        games = await GamesService.GetGamesAsync(currentPage, 20, searchTerm);
+        games = await GamesService.GetGamesAsync(currentPage, 20, searchTerm, ratedOnly: string.IsNullOrWhiteSpace(searchTerm));
         isLoading = false;
     }
 

@@ -2,6 +2,7 @@
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
     "http": {
+      "launchUrl": "",
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
@@ -12,6 +13,7 @@
       }
     },
     "https": {
+      "launchUrl": "",
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
