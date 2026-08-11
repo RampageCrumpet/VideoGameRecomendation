@@ -180,5 +180,61 @@ namespace GameRecommendation.SteamImporter.Tests
             Assert.Empty(harness.Database.Games);
             harness.Fetcher.Verify(f => f.GetGameAsync(It.IsAny<int>()), Times.Never);
         }
+
+        // ── Per-item failure isolation ───────────────────────────────────────
+        // Regression tests: a single item throwing (e.g. a malformed Steam
+        // response) must not abort the rest of the batch.
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public async Task ImportGamesAsync_ContinuesBatch_WhenFetcherThrowsForOneAppId()
+        {
+            var harness = new SteamImportTestHarness();
+            var goodResponse = MakeSteamResponse(222);
+
+            harness.Fetcher.Setup(f => f.GetGameAsync(111)).ThrowsAsync(new InvalidOperationException("boom"));
+            harness.Fetcher.Setup(f => f.GetGameAsync(222)).ReturnsAsync(goodResponse);
+            harness.Mapper.Setup(m => m.Map(222, goodResponse)).Returns(MakeGame(222));
+            harness.TagExtractor.Setup(e => e.Extract(It.IsAny<JsonElement>())).Returns([]);
+
+            await harness.Runner.ImportGamesAsync(new[] { 111, 222 });
+
+            Assert.Single(harness.Database.Games);
+            Assert.Equal(222, harness.Database.Games.Single().SteamAppId);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public async Task ImportGamesAsync_ContinuesBatch_WhenMapperThrowsForOneAppId()
+        {
+            var harness = new SteamImportTestHarness();
+            var badResponse = MakeSteamResponse(111);
+            var goodResponse = MakeSteamResponse(222);
+
+            harness.Fetcher.Setup(f => f.GetGameAsync(111)).ReturnsAsync(badResponse);
+            harness.Fetcher.Setup(f => f.GetGameAsync(222)).ReturnsAsync(goodResponse);
+            harness.Mapper.Setup(m => m.Map(111, badResponse)).Throws(new KeyNotFoundException("missing field"));
+            harness.Mapper.Setup(m => m.Map(222, goodResponse)).Returns(MakeGame(222));
+            harness.TagExtractor.Setup(e => e.Extract(It.IsAny<JsonElement>())).Returns([]);
+
+            await harness.Runner.ImportGamesAsync(new[] { 111, 222 });
+
+            Assert.Single(harness.Database.Games);
+            Assert.Equal(222, harness.Database.Games.Single().SteamAppId);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public async Task ImportGamesAsync_StillSavesChanges_WhenAnItemThrows()
+        {
+            var harness = new SteamImportTestHarness();
+
+            harness.Fetcher.Setup(f => f.GetGameAsync(111)).ThrowsAsync(new InvalidOperationException("boom"));
+
+            await harness.Runner.ImportGamesAsync(new[] { 111 });
+
+            // Should complete without propagating the exception to the caller.
+            Assert.Empty(harness.Database.Games);
+        }
     }
 }

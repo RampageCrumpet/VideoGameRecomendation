@@ -38,6 +38,17 @@ namespace GameRecommendation.API.Controllers
             if (!gameExists)
                 return NotFound();
 
+            // Guards against an authenticated JWT for a user that has no corresponding
+            // RatingUsers row (e.g. an inconsistent account). Without this check, inserting
+            // a UserRating for a nonexistent UserId is an unhandled foreign key violation
+            // against a real database.
+            var userExists = await dbContext.RatingUsers
+                .AsNoTracking()
+                .AnyAsync(user => user.Id == userId);
+
+            if (!userExists)
+                return NotFound();
+
             var existingRating = await dbContext.UserRatings
                 .FirstOrDefaultAsync(rating =>
                     rating.UserId == userId &&

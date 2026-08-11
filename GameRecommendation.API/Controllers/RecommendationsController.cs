@@ -29,6 +29,9 @@ namespace GameRecommendation.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetRecommendations([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
+            if (page < 1 || pageSize < 1)
+                return BadRequest("Page and pageSize must be greater than zero.");
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
             var result = await recommendationService.GetRecommendationsAsync(userId, page, pageSize);

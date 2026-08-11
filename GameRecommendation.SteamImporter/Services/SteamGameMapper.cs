@@ -46,29 +46,45 @@ namespace GameRecommendation.SteamImporter.Services
             return new Game
             {
                 SteamAppId = appId,
-                Name = data.GetProperty("name").GetString() ?? "",
-                Description = data.GetProperty("short_description").GetString() ?? "",
-                ImageUrl = data.GetProperty("header_image").GetString() ?? "",
-                ReleaseDate = ParseReleaseDate(appId, data.GetProperty("release_date"))
+                Name = GetOptionalString(data, "name"),
+                Description = GetOptionalString(data, "short_description"),
+                ImageUrl = GetOptionalString(data, "header_image"),
+                ReleaseDate = ParseReleaseDate(appId, data)
             };
         }
 
         /// <summary>
-        /// Attempts to parse the release date from the given <see cref="JsonElement"/>.
+        /// Reads a string property from the given <see cref="JsonElement"/>, tolerating a missing
+        /// property or a JSON null value by returning an empty string instead of throwing.
+        /// </summary>
+        /// <param name="data">The <see cref="JsonElement"/> to read the property from.</param>
+        /// <param name="propertyName">The name of the property to read.</param>
+        /// <returns>The property's string value, or an empty string if missing or null.</returns>
+        private static string GetOptionalString(JsonElement data, string propertyName) =>
+            data.TryGetProperty(propertyName, out var value) ? value.GetString() ?? "" : "";
+
+        /// <summary>
+        /// Attempts to parse the release date from the given game <see cref="JsonElement"/>.
+        /// Tolerates a missing "release_date" property, a missing "date" sub-property, and an
+        /// unparseable date string, in all cases falling back to <see cref="DateTime.MinValue"/>.
         /// </summary>
         /// <param name="appId">The Steam AppId of the game being parsed, used for logging.</param>
-        /// <param name="releaseDate">The <see cref="JsonElement"/> containing the release date data.</param>
+        /// <param name="data">The game's "data" <see cref="JsonElement"/>.</param>
         /// <returns>The parsed <see cref="DateTime"/>, or <see cref="DateTime.MinValue"/> if parsing failed.</returns>
-        private DateTime ParseReleaseDate(int appId, JsonElement releaseDate)
+        private DateTime ParseReleaseDate(int appId, JsonElement data)
         {
-            if (releaseDate.TryGetProperty("date", out var dateStr) &&
+            if (data.TryGetProperty("release_date", out var releaseDate) &&
+                releaseDate.TryGetProperty("date", out var dateStr) &&
                 DateTime.TryParse(dateStr.GetString(), out var parsed))
             {
                 return parsed;
             }
 
-            logger.LogWarning("AppId {AppId} has unparseable release date: '{Date}'",
-                appId, releaseDate.TryGetProperty("date", out var raw) ? raw.GetString() : "missing");
+            var rawDate = data.TryGetProperty("release_date", out var rd) && rd.TryGetProperty("date", out var raw)
+                ? raw.GetString()
+                : "missing";
+
+            logger.LogWarning("AppId {AppId} has unparseable release date: '{Date}'", appId, rawDate);
 
             return DateTime.MinValue;
         }

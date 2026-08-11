@@ -155,5 +155,166 @@ namespace GameRecommendation.SteamImporter.Tests
             Assert.Single(logger.Entries);
             Assert.Equal(LogLevel.Warning, logger.Entries[0].Level);
         }
+
+        // ── Missing field resilience ─────────────────────────────────────────
+        // Regression tests: Map() must never throw on a malformed-but-"successful"
+        // Steam response. It previously used GetProperty (which throws on a missing
+        // key) for name/short_description/header_image/release_date.
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_DoesNotThrow_WhenNamePropertyMissing()
+        {
+            using var json = JsonDocument.Parse("""
+            {
+                "730": {
+                    "success": true,
+                    "data": {
+                        "short_description": "desc",
+                        "header_image": "img",
+                        "release_date": { "date": "2023-01-01" }
+                    }
+                }
+            }
+            """);
+
+            var result = mapper.Map(730, json);
+
+            Assert.NotNull(result);
+            Assert.Equal("", result.Name);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_DoesNotThrow_WhenShortDescriptionPropertyMissing()
+        {
+            using var json = JsonDocument.Parse("""
+            {
+                "730": {
+                    "success": true,
+                    "data": {
+                        "name": "Test Game",
+                        "header_image": "img",
+                        "release_date": { "date": "2023-01-01" }
+                    }
+                }
+            }
+            """);
+
+            var result = mapper.Map(730, json);
+
+            Assert.NotNull(result);
+            Assert.Equal("", result.Description);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_DoesNotThrow_WhenHeaderImagePropertyMissing()
+        {
+            using var json = JsonDocument.Parse("""
+            {
+                "730": {
+                    "success": true,
+                    "data": {
+                        "name": "Test Game",
+                        "short_description": "desc",
+                        "release_date": { "date": "2023-01-01" }
+                    }
+                }
+            }
+            """);
+
+            var result = mapper.Map(730, json);
+
+            Assert.NotNull(result);
+            Assert.Equal("", result.ImageUrl);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_DoesNotThrow_WhenReleaseDatePropertyEntirelyMissing()
+        {
+            using var json = JsonDocument.Parse("""
+            {
+                "730": {
+                    "success": true,
+                    "data": {
+                        "name": "Test Game",
+                        "short_description": "desc",
+                        "header_image": "img"
+                    }
+                }
+            }
+            """);
+
+            var result = mapper.Map(730, json);
+
+            Assert.NotNull(result);
+            Assert.Equal(DateTime.MinValue, result.ReleaseDate);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_LogsWarning_WhenReleaseDatePropertyEntirelyMissing()
+        {
+            using var json = JsonDocument.Parse("""
+            {
+                "730": {
+                    "success": true,
+                    "data": {
+                        "name": "Test Game",
+                        "short_description": "desc",
+                        "header_image": "img"
+                    }
+                }
+            }
+            """);
+
+            mapper.Map(730, json);
+
+            Assert.Single(logger.Entries);
+            Assert.Equal(LogLevel.Warning, logger.Entries[0].Level);
+            Assert.Contains("missing", logger.Entries[0].Message);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_ReturnsGame_WhenAllOptionalFieldsMissing()
+        {
+            using var json = JsonDocument.Parse("""{ "730": { "success": true, "data": {} } }""");
+
+            var result = mapper.Map(730, json);
+
+            Assert.NotNull(result);
+            Assert.Equal(730, result.SteamAppId);
+            Assert.Equal("", result.Name);
+            Assert.Equal("", result.Description);
+            Assert.Equal("", result.ImageUrl);
+            Assert.Equal(DateTime.MinValue, result.ReleaseDate);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Map_ReturnsEmptyString_WhenNamePropertyIsJsonNull()
+        {
+            using var json = JsonDocument.Parse("""
+            {
+                "730": {
+                    "success": true,
+                    "data": {
+                        "name": null,
+                        "short_description": "desc",
+                        "header_image": "img",
+                        "release_date": { "date": "2023-01-01" }
+                    }
+                }
+            }
+            """);
+
+            var result = mapper.Map(730, json);
+
+            Assert.NotNull(result);
+            Assert.Equal("", result.Name);
+        }
     }
 }

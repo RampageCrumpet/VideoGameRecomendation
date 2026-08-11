@@ -1,11 +1,13 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable disable
 
 namespace GameRecommendation.Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage(Justification = "EF Core migration scaffolding is auto-generated SQL Server DDL. It is executed only by EF tooling against a real database and cannot be meaningfully exercised by unit tests.")]
     public partial class InitialCreate : Migration
     {
         /// <inheritdoc />

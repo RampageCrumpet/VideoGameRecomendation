@@ -5,12 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable disable
 
 namespace GameRecommendation.Infrastructure.Migrations
 {
     [DbContext(typeof(RecommendationDbContext))]
+    [ExcludeFromCodeCoverage(Justification = "EF Core model snapshot is auto-generated scaffolding used by EF tooling to compute migrations. It is not executed at runtime or during testing.")]
     partial class RecommendationDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

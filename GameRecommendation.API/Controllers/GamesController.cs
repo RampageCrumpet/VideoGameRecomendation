@@ -32,8 +32,12 @@ namespace GameRecommendation.API.Controllers
         /// <param name="ratedOnly">When true (default) limits results to games the user has rated when not searching.</param>
         [HttpGet]
         [ProducesResponseType(typeof(PagedResultDto<GameSummaryDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetGames([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] bool ratedOnly = true)
         {
+            if (page < 1 || pageSize < 1)
+                return BadRequest("Page and pageSize must be greater than zero.");
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var query = dbContext.Games

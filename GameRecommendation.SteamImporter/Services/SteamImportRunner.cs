@@ -63,7 +63,17 @@ namespace GameRecommendation.SteamImporter.Services
 
             foreach (var id in idList)
             {
-                var result = await ProcessGame(id);
+                bool result;
+                try
+                {
+                    result = await ProcessGame(id);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Unhandled error processing appId {AppId}. Skipping.", id);
+                    result = false;
+                }
+
                 if (result) succeeded++;
                 else failed++;
             }
